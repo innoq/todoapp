@@ -1,0 +1,21 @@
+cache:
+  paths:
+    - .m2/repository
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+
+stages:
+  - build
+  - package
+  - deploy
+
+build:
+  stage: build
+  image: maven:3.8-openjdk-17-slim
+  script:
+    - mvn package
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - target/todoapp-jar-with-dependencies.jar
