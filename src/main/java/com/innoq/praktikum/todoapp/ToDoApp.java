@@ -36,27 +36,30 @@ public class ToDoApp {
     public void start() throws IOException {
         HttpServer httpServer = HttpServer.create(new InetSocketAddress(8080), 0);
         httpServer.createContext("/aufgaben", this::handleAufgabenRequest);
-        httpServer.createContext("/health", this::healthHandler);
+        httpServer.createContext("/health", this::handleHealthRequest);
         httpServer.createContext("/", this::handleRootRequest);
         httpServer.start();
         System.out.println("HTTP Server auf Port 8080 gestartet");
     }
 
-    private void healthHandler(HttpExchange exchange) throws IOException {
+    private void handleHealthRequest(HttpExchange exchange) throws IOException {
         sendResponse(exchange, 200, "text/plain", "I'm fine");
     }
 
     private void handleRootRequest(HttpExchange exchange) throws IOException {
+        System.out.println(exchange.getRequestMethod() + " " + exchange.getRequestURI());
+
         if (!exchange.getRequestURI().toString().equals("/")) {
             sendEmptyResponse(exchange, 404);
             return;
         }
 
-        System.out.println(exchange.getRequestURI() + " wurde angefragt");
         redirectToAufgaben(exchange);
     }
 
     private void handleAufgabenRequest(HttpExchange exchange) throws IOException {
+        System.out.println(exchange.getRequestMethod() + " " + exchange.getRequestURI());
+
         try {
             if (exchange.getRequestURI().toString().equals("/aufgaben")) {
                 handleAufgabenListeRequest(exchange);
@@ -72,8 +75,6 @@ public class ToDoApp {
     }
 
     private void handleEinzelneAufgabeRequest(HttpExchange exchange) throws IOException {
-        System.out.println("POST " + exchange.getRequestURI());
-
         int id = parseId(exchange.getRequestURI());
         Map<String, String> formData = readFormData(exchange);
 
@@ -109,8 +110,6 @@ public class ToDoApp {
     }
 
     private void handlePostNeueAufgabe(HttpExchange exchange) throws IOException {
-        System.out.println("POST " + exchange.getRequestURI());
-
         Map<String, String> formData = readFormData(exchange);
         if (formData.containsKey("bezeichnung")) {
             if(formData.get("bezeichnung").equalsIgnoreCase("weekend")){
@@ -142,8 +141,6 @@ public class ToDoApp {
     }
 
     private void handleGetOffeneAufgaben(HttpExchange exchange) throws IOException {
-        System.out.println("GET " + exchange.getRequestURI());
-
         List<Aufgabe> offeneAufgaben = aufgabenListe.offeneAufgaben();
         System.out.println(offeneAufgaben.size() + " offene Aufgaben gefunden");
 
