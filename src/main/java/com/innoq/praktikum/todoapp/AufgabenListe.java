@@ -9,6 +9,9 @@ public class AufgabenListe {
     public AufgabenListe() {
         this.aufgaben = new ArrayList<>();
     }
+    public Aufgabe getAufgabe (int pos){
+        return aufgaben.get(pos);
+    }
 
     public void neueAufgabe(String bezeichnung) {
         Aufgabe aufgabe = new Aufgabe(bezeichnung, false);

@@ -9,6 +9,8 @@ public class ToDoApp {
         aufgabenListe.neueAufgabe("Test 2");
         aufgabenListe.neueAufgabe("lol");
 
+
+        aufgabenListe.getAufgabe(1).aufgabeerledigen();
         List<Aufgabe> aufgaben = aufgabenListe.offeneAufgaben();
         for (int i=0; i<aufgaben.size(); i++) {
             Aufgabe aufgabe = aufgaben.get(i);
