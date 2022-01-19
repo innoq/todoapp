@@ -11,6 +11,9 @@ public class Aufgabe {
     public void aufgabeerledigen() {
         this.erledigt = true;
     }
+    public void aufgabeundo() {
+        this.erledigt = false;
+    }
     public boolean isterledigt(){
         return this.erledigt;
     }
@@ -19,4 +22,3 @@ public class Aufgabe {
         return getClass().getSimpleName() + " '" + bezeichnung + "' (" + hashCode() + ")" +erledigt;
     }
 }
-
