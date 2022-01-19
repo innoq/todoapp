@@ -1,8 +1,15 @@
 package com.innoq.praktikum.todoapp;
 
 public class Aufgabe {
-    public Aufgabe(String bezeichnung, boolean erledigt) {
+    private String bezeichnung;
 
+    public Aufgabe(String bezeichnung, boolean erledigt) {
+        this.bezeichnung = bezeichnung;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " '" + bezeichnung + "' (" + hashCode() + ")";
     }
 }
 
