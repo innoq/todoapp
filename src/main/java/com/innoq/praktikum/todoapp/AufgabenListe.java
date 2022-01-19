@@ -15,11 +15,8 @@ public class AufgabenListe {
         aufgaben.add(aufgabe);
     }
 
-    public void offeneAufgaben() {
-        for (int i=0; i<aufgaben.size(); i++) {
-            Aufgabe aufgabe = aufgaben.get(i);
-            System.out.println(aufgabe);
-        }
+    public List<Aufgabe> offeneAufgaben() {
+        return aufgaben;
     }
 }
 
