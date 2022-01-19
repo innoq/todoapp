@@ -11,7 +11,9 @@ public class Aufgabe {
     public void aufgabeerledigen() {
         this.erledigt = true;
     }
-
+    public boolean isterledigt(){
+        return this.erledigt;
+    }
     @Override
     public String toString() {
         return getClass().getSimpleName() + " '" + bezeichnung + "' (" + hashCode() + ")" +erledigt;

@@ -11,10 +11,13 @@ public class ToDoApp {
 
 
         aufgabenListe.getAufgabe(1).aufgabeerledigen();
-        List<Aufgabe> aufgaben = aufgabenListe.offeneAufgaben();
-        for (int i=0; i<aufgaben.size(); i++) {
-            Aufgabe aufgabe = aufgaben.get(i);
+
+        List<Aufgabe> offeneAufgaben = aufgabenListe.offeneAufgaben();
+        for (int i = 0; i < offeneAufgaben.size(); i++) {
+            Aufgabe aufgabe = offeneAufgaben.get(i);
+
             System.out.println(aufgabe);
+
         }
     }
 }
