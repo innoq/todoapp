@@ -1,5 +1,7 @@
 package com.innoq.praktikum.todoapp;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
@@ -50,16 +52,28 @@ public class ToDoApp {
                 List<Aufgabe> offeneAufgaben = aufgabenListe.offeneAufgaben();
                 System.out.println(offeneAufgaben.size() + " offene Aufgaben gefunden");
 
-                exchange.getResponseHeaders().set("Content-type", "text/plain");
-                exchange.sendResponseHeaders(200, 0);
+                if (exchange.getRequestHeaders().getFirst("Accept").contains("application/json")) {
+                    exchange.getResponseHeaders().set("Content-type", "application/json");
+                    exchange.sendResponseHeaders(200, 0);
 
-                OutputStream outputStream = exchange.getResponseBody();
-                PrintWriter writer = new PrintWriter(outputStream);
+                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                    String json = gson.toJson(offeneAufgaben);
+                    OutputStream outputStream = exchange.getResponseBody();
+                    PrintWriter writer = new PrintWriter(outputStream);
+                    writer.println(json);
+                    writer.close();
 
-                for (Aufgabe aufgabe : offeneAufgaben) {
-                    writer.println(aufgabe);
+                } else {
+                    exchange.getResponseHeaders().set("Content-type", "text/plain");
+                    exchange.sendResponseHeaders(200, 0);
+
+                    OutputStream outputStream = exchange.getResponseBody();
+                    PrintWriter writer = new PrintWriter(outputStream);
+                    for (Aufgabe aufgabe : offeneAufgaben) {
+                        writer.println(aufgabe);
+                    }
+                    writer.close();
                 }
-                writer.close();
 
             } else if (exchange.getRequestMethod().equals("POST")) {
                 System.out.println("POST " + exchange.getRequestURI());

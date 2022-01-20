@@ -21,6 +21,10 @@ Offene Aufgabe abfragen
 
     curl -v http://localhost:8080/aufgaben
 
+Offene Aufgaben im JSON Format
+
+    curl -v -H "Accept: application/json" http://localhost:8080/aufgaben
+
 Aufgabe hinzufügen
 
     curl -v -X POST -d "bezeichnung=Aufgabe 1" http://localhost:8080/aufgaben
