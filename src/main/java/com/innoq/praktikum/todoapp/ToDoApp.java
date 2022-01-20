@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpServer;
 
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -15,10 +16,6 @@ public class ToDoApp {
 
     public ToDoApp() {
         aufgabenListe = new AufgabenListe();
-        aufgabenListe.neueAufgabe("Aufgabe 1");
-        aufgabenListe.neueAufgabe("Aufgabe 2");
-        aufgabenListe.neueAufgabe("lol");
-        aufgabenListe.getAufgabe(1).aufgabeerledigen();
     }
 
     public static void main(String[] args) throws IOException {
@@ -46,41 +43,66 @@ public class ToDoApp {
     }
 
     private void handleAufgabenRequest(HttpExchange exchange) throws IOException {
-        if (!exchange.getRequestURI().toString().equals("/aufgaben")) {
-            exchange.sendResponseHeaders(404, -1);
-            return;
-        }
+        if (exchange.getRequestURI().toString().equals("/aufgaben")) {
+            if (exchange.getRequestMethod().equals("GET")) {
+                System.out.println("GET " + exchange.getRequestURI());
 
-        if (exchange.getRequestMethod().equals("GET")) {
-            System.out.println("GET " + exchange.getRequestURI());
+                List<Aufgabe> offeneAufgaben = aufgabenListe.offeneAufgaben();
+                System.out.println(offeneAufgaben.size() + " offene Aufgaben gefunden");
 
-            List<Aufgabe> offeneAufgaben = aufgabenListe.offeneAufgaben();
-            System.out.println(offeneAufgaben.size() + " offene Aufgaben gefunden");
+                exchange.getResponseHeaders().set("Content-type", "text/plain");
+                exchange.sendResponseHeaders(200, 0);
 
-            exchange.getResponseHeaders().set("Content-type", "text/plain");
-            exchange.sendResponseHeaders(200, 0);
+                OutputStream outputStream = exchange.getResponseBody();
+                PrintWriter writer = new PrintWriter(outputStream);
 
-            OutputStream outputStream = exchange.getResponseBody();
-            PrintWriter writer = new PrintWriter(outputStream);
+                for (Aufgabe aufgabe : offeneAufgaben) {
+                    writer.println(aufgabe);
+                }
+                writer.close();
 
-            for (Aufgabe aufgabe : offeneAufgaben) {
-                writer.println(aufgabe);
+            } else if (exchange.getRequestMethod().equals("POST")) {
+                System.out.println("POST " + exchange.getRequestURI());
+
+                Map<String, String> formData = readFormData(exchange);
+                aufgabenListe.neueAufgabe(formData.get("bezeichnung"));
+
+                exchange.getResponseHeaders().set("Location", "/aufgaben");
+                exchange.sendResponseHeaders(201, -1);
             }
-            writer.close();
 
-        } else if (exchange.getRequestMethod().equals("POST")) {
+        } else if (exchange.getRequestURI().toString().matches("/aufgaben/\\d+")) {
             System.out.println("POST " + exchange.getRequestURI());
 
-            InputStream inputStream = exchange.getRequestBody();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String daten = reader.readLine();
-            Map<String, String> formData = parseFormData(daten);
-            aufgabenListe.neueAufgabe(formData.get("bezeichnung"));
+            int id = parseId(exchange.getRequestURI());
+            Map<String, String> formData = readFormData(exchange);
+            if (formData.containsKey("erledigt") && formData.get("erledigt").equals("true")) {
+                for (Aufgabe aufgabe : aufgabenListe.offeneAufgaben()) {
+                    if (aufgabe.hashCode() == id) {
+                        aufgabe.aufgabeerledigen();
+                        break;
+                    }
+                }
+            }
 
             exchange.getResponseHeaders().set("Location", "/aufgaben");
-            exchange.sendResponseHeaders(201, -1);
-        }
+            exchange.sendResponseHeaders(302, -1);
 
+        } else {
+            exchange.sendResponseHeaders(404, -1);
+        }
+    }
+
+    private Map<String, String> readFormData(HttpExchange exchange) throws IOException {
+        InputStream inputStream = exchange.getRequestBody();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        String daten = reader.readLine();
+        Map<String, String> formData = parseFormData(daten);
+        return formData;
+    }
+
+    private int parseId(URI uri) {
+        return Integer.parseInt(uri.toString().substring(uri.toString().lastIndexOf("/") + 1));
     }
 
     private Map<String, String> parseFormData(String body) {
