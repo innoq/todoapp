@@ -15,4 +15,20 @@ Geplante Iterationen
 * HTTP (Web) API
 * Web App
 
-Test
+## Curl Statements
+
+Offene Aufgabe abfragen
+
+    curl -v http://localhost:8080/aufgaben
+
+Aufgabe hinzufügen
+
+    curl -v -X POST -d "bezeichnung=Aufgabe 1" http://localhost:8080/aufgaben
+
+Aufgabe erledigen
+
+    curl -v -X POST -d "erledigt=true" http://localhost:8080/aufgaben/350506724
+
+Undo
+
+    curl -v -X POST -d "erledigt=false" http://localhost:8080/aufgaben/350506724
