@@ -3,11 +3,11 @@ package com.innoq.praktikum.todoapp;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.InetSocketAddress;
-import java.util.List;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 public class ToDoApp {
 
@@ -51,20 +51,67 @@ public class ToDoApp {
             return;
         }
 
-        System.out.println(exchange.getRequestURI() + " wurde angefragt");
+        if (exchange.getRequestMethod().equals("GET")) {
+            System.out.println("GET " + exchange.getRequestURI());
 
-        List<Aufgabe> offeneAufgaben = aufgabenListe.offeneAufgaben();
-        System.out.println(offeneAufgaben.size() + " offene Aufgaben gefunden");
+            List<Aufgabe> offeneAufgaben = aufgabenListe.offeneAufgaben();
+            System.out.println(offeneAufgaben.size() + " offene Aufgaben gefunden");
 
-        exchange.getResponseHeaders().set("Content-type", "text/plain");
-        exchange.sendResponseHeaders(200, 0);
+            exchange.getResponseHeaders().set("Content-type", "text/plain");
+            exchange.sendResponseHeaders(200, 0);
 
-        OutputStream outputStream = exchange.getResponseBody();
-        PrintWriter writer = new PrintWriter(outputStream);
+            OutputStream outputStream = exchange.getResponseBody();
+            PrintWriter writer = new PrintWriter(outputStream);
 
-        for (Aufgabe aufgabe : offeneAufgaben) {
-            writer.println(aufgabe);
+            for (Aufgabe aufgabe : offeneAufgaben) {
+                writer.println(aufgabe);
+            }
+            writer.close();
+
+        } else if (exchange.getRequestMethod().equals("POST")) {
+            System.out.println("POST " + exchange.getRequestURI());
+
+            InputStream inputStream = exchange.getRequestBody();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            String daten = reader.readLine();
+            Map<String, String> formData = parseFormData(daten);
+            aufgabenListe.neueAufgabe(formData.get("bezeichnung"));
+
+            exchange.getResponseHeaders().set("Location", "/aufgaben");
+            exchange.sendResponseHeaders(201, -1);
         }
-        writer.close();
+
     }
+
+    private Map<String, String> parseFormData(String body) {
+        if (body == null || body.isBlank()) {
+            return Collections.emptyMap();
+        }
+
+        // body: startdatum=2022-01-01&enddatum=2022-01-22&bezeichnung=Urlaub
+
+        Map<String, String> map = new HashMap<>();
+        var paramTokenizer = new StringTokenizer(body, "&");
+        // startdatum=2022-01-01
+        // enddatum=2022-01-22
+        // bezeichnung=Urlaub
+
+        while (paramTokenizer.hasMoreTokens()) {
+            var nextParam = paramTokenizer.nextToken();
+            var keyValue = nextParam.split("=");
+            // bezeichnung
+            // Urlaub
+
+            var key = keyValue[0];
+            if (keyValue.length > 1) {
+                var value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                map.put(key, value);
+            } else {
+                map.put(key, "");
+            }
+        }
+        return map;
+    }
+
+
 }
