@@ -76,13 +76,32 @@ public class ToDoApp {
 
             int id = parseId(exchange.getRequestURI());
             Map<String, String> formData = readFormData(exchange);
-            if (formData.containsKey("erledigt") && formData.get("erledigt").equals("true")) {
-                for (Aufgabe aufgabe : aufgabenListe.offeneAufgaben()) {
-                    if (aufgabe.hashCode() == id) {
-                        aufgabe.aufgabeerledigen();
-                        break;
-                    }
+
+            if (!formData.containsKey("erledigt")) {
+                exchange.sendResponseHeaders(400, -1);
+                return;
+            }
+
+            Aufgabe zuAenderndeAufgabe = null;
+            for (Aufgabe aufgabe : aufgabenListe.alleAufgaben()) {
+                if (aufgabe.hashCode() == id) {
+                    zuAenderndeAufgabe = aufgabe;
+                    break;
                 }
+            }
+
+            if (zuAenderndeAufgabe == null) {
+                exchange.sendResponseHeaders(404, -1);
+                return;
+            }
+
+            if (formData.get("erledigt").equals("true")) {
+                zuAenderndeAufgabe.aufgabeerledigen();
+            } else if (formData.get("erledigt").equals("false")) {
+                zuAenderndeAufgabe.aufgabeundo();
+            } else {
+                exchange.sendResponseHeaders(400, -1);
+                return;
             }
 
             exchange.getResponseHeaders().set("Location", "/aufgaben");

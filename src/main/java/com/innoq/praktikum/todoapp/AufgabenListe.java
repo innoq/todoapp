@@ -30,5 +30,9 @@ public class AufgabenListe {
         }
         return offeneAufgaben;
     }
+
+    public List<Aufgabe> alleAufgaben() {
+        return aufgaben;
+    }
 }
 
