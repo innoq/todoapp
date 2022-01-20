@@ -32,22 +32,6 @@ public class ToDoApp {
         httpServer.createContext("/", this::handleRootRequest);
         httpServer.start();
         System.out.println("HTTP Server auf Port 8080 gestartet");
-
-//        AufgabenListe aufgabenListe = new AufgabenListe();
-//        aufgabenListe.neueAufgabe("Test 1");
-//        aufgabenListe.neueAufgabe("Test 2");
-//        aufgabenListe.neueAufgabe("lol");
-//
-//
-//        aufgabenListe.getAufgabe(1).aufgabeerledigen();
-//
-//        List<Aufgabe> offeneAufgaben = aufgabenListe.offeneAufgaben();
-//        for (int i = 0; i < offeneAufgaben.size(); i++) {
-//            Aufgabe aufgabe = offeneAufgaben.get(i);
-//
-//            System.out.println(aufgabe);
-//
-//        }
     }
 
     private void handleRootRequest(HttpExchange exchange) throws IOException {
