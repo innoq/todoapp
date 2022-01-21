@@ -35,7 +35,7 @@ public class ToDoApp {
 
     private void handleRootRequest(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestURI().toString().equals("/")) {
-            exchange.sendResponseHeaders(404, -1);
+            sendEmptyResponse(exchange, 404);
             return;
         }
 
@@ -81,7 +81,7 @@ public class ToDoApp {
             Map<String, String> formData = readFormData(exchange);
 
             if (!formData.containsKey("erledigt")) {
-                exchange.sendResponseHeaders(400, -1);
+                sendEmptyResponse(exchange, 400);
                 return;
             }
 
@@ -94,7 +94,7 @@ public class ToDoApp {
             }
 
             if (zuAenderndeAufgabe == null) {
-                exchange.sendResponseHeaders(404, -1);
+                sendEmptyResponse(exchange, 404);
                 return;
             }
 
@@ -103,7 +103,7 @@ public class ToDoApp {
             } else if (formData.get("erledigt").equals("false")) {
                 zuAenderndeAufgabe.aufgabeundo();
             } else {
-                exchange.sendResponseHeaders(400, -1);
+                sendEmptyResponse(exchange, 400);
                 return;
             }
 
@@ -111,8 +111,12 @@ public class ToDoApp {
             exchange.sendResponseHeaders(302, -1);
 
         } else {
-            exchange.sendResponseHeaders(404, -1);
+            sendEmptyResponse(exchange, 404);
         }
+    }
+
+    private void sendEmptyResponse(HttpExchange exchange, int statusCode) throws IOException {
+        exchange.sendResponseHeaders(statusCode, -1);
     }
 
     private void sendResponse(HttpExchange exchange, int statusCode, String contentType, String data) throws IOException {
