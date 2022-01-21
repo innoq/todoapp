@@ -8,6 +8,10 @@ public class Aufgabe {
         this.erledigt = erledigt;
     }
 
+    public int getId() {
+        return hashCode();
+    }
+
     public void aufgabeerledigen() {
         this.erledigt = true;
     }
@@ -19,6 +23,6 @@ public class Aufgabe {
     }
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " '" + bezeichnung + "' (" + hashCode() + ")" +erledigt;
+        return getClass().getSimpleName() + " '" + bezeichnung + "' (" + getId() + ")" +erledigt;
     }
 }

@@ -27,7 +27,7 @@ public class AufgabenListe {
 
     public Aufgabe findAufgabeById(int id) {
         for (Aufgabe aufgabe : aufgaben) {
-            if (aufgabe.hashCode() == id) {
+            if (aufgabe.getId() == id) {
                 return aufgabe;
             }
         }
