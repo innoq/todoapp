@@ -99,6 +99,13 @@ public class ToDoApp {
                 && formData.get("bezeichnung").length() <= 20) {
             aufgabenListe.neueAufgabe(formData.get("bezeichnung"));
         }
+        else if (formData.containsKey("weekend")&&formData.get("weekend").equals("true")) {
+            System.out.println("Weekend started");
+            for (Aufgabe aufgabe : aufgabenListe.offeneAufgaben()) {
+                aufgabe.aufgabeerledigen();
+            }
+        }
+
         else{
             sendEmptyResponse(exchange, 400);
         }

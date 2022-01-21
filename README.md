@@ -28,7 +28,7 @@ Offene Aufgaben im JSON Format
 Aufgabe hinzufügen
 
     curl -v -X POST -d "bezeichnung=Aufgabe 1" http://localhost:8080/aufgaben
-
+    curl -v -X POST -d "weekend=true" http://localhost:8080/aufgaben
 Aufgabe erledigen
 
     curl -v -X POST -d "erledigt=true" http://localhost:8080/aufgaben/350506724
