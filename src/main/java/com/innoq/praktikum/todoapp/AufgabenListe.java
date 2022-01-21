@@ -10,11 +10,6 @@ public class AufgabenListe {
         this.aufgaben = new ArrayList<>();
     }
 
-
-    public Aufgabe getAufgabe (int pos){
-        return aufgaben.get(pos);
-    }
-
     public void neueAufgabe(String bezeichnung) {
         Aufgabe aufgabe = new Aufgabe(bezeichnung, false);
         aufgaben.add(aufgabe);
@@ -22,8 +17,7 @@ public class AufgabenListe {
 
     public List<Aufgabe> offeneAufgaben() {
         List<Aufgabe> offeneAufgaben = new ArrayList<>();
-        for (int i = 0; i < aufgaben.size(); i++) {
-            Aufgabe aufgabe = aufgaben.get(i);
+        for (Aufgabe aufgabe : aufgaben) {
             if (!aufgabe.isterledigt()) {
                 offeneAufgaben.add(aufgabe);
             }
@@ -31,8 +25,13 @@ public class AufgabenListe {
         return offeneAufgaben;
     }
 
-    public List<Aufgabe> alleAufgaben() {
-        return aufgaben;
+    public Aufgabe findAufgabeById(int id) {
+        for (Aufgabe aufgabe : aufgaben) {
+            if (aufgabe.hashCode() == id) {
+                return aufgabe;
+            }
+        }
+        return null;
     }
 }
 

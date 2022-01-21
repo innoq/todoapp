@@ -64,14 +64,7 @@ public class ToDoApp {
             return;
         }
 
-        Aufgabe zuAenderndeAufgabe = null;
-        for (Aufgabe aufgabe : aufgabenListe.alleAufgaben()) {
-            if (aufgabe.hashCode() == id) {
-                zuAenderndeAufgabe = aufgabe;
-                break;
-            }
-        }
-
+        Aufgabe zuAenderndeAufgabe = aufgabenListe.findAufgabeById(id);
         if (zuAenderndeAufgabe == null) {
             sendEmptyResponse(exchange, 404);
             return;
@@ -143,7 +136,8 @@ public class ToDoApp {
     private String createPlainTextData(List<Aufgabe> offeneAufgaben) {
         String data = "";
         for (Aufgabe aufgabe : offeneAufgaben) {
-            data = data + aufgabe + "\n";
+            //noinspection StringConcatenationInLoop
+            data += aufgabe + "\n";
         }
         return data;
     }
@@ -159,8 +153,7 @@ public class ToDoApp {
         InputStream inputStream = exchange.getRequestBody();
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String daten = reader.readLine();
-        Map<String, String> formData = parseFormData(daten);
-        return formData;
+        return parseFormData(daten);
     }
 
     private int parseId(URI uri) {
