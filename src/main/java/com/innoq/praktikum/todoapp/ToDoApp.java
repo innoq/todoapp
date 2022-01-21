@@ -53,19 +53,15 @@ public class ToDoApp {
                 System.out.println(offeneAufgaben.size() + " offene Aufgaben gefunden");
 
                 if (exchange.getRequestHeaders().getFirst("Accept").contains("application/json")) {
-                    exchange.getResponseHeaders().set("Content-type", "application/json");
-                    exchange.sendResponseHeaders(200, 0);
-
                     Gson gson = new GsonBuilder().setPrettyPrinting().create();
                     String data = gson.toJson(offeneAufgaben);
-                    writeResponseBody(exchange, data);
+
+                    sendResponse(exchange, 200, "application/json", data);
 
                 } else {
-                    exchange.getResponseHeaders().set("Content-type", "text/plain");
-                    exchange.sendResponseHeaders(200, 0);
-
                     String data = createPlainTextData(offeneAufgaben);
-                    writeResponseBody(exchange, data);
+
+                    sendResponse(exchange, 200, "text/plain", data);
                 }
 
             } else if (exchange.getRequestMethod().equals("POST")) {
@@ -117,6 +113,12 @@ public class ToDoApp {
         } else {
             exchange.sendResponseHeaders(404, -1);
         }
+    }
+
+    private void sendResponse(HttpExchange exchange, int statusCode, String contentType, String data) throws IOException {
+        exchange.getResponseHeaders().set("Content-type", contentType);
+        exchange.sendResponseHeaders(statusCode, 0);
+        writeResponseBody(exchange, data);
     }
 
     private String createPlainTextData(List<Aufgabe> offeneAufgaben) {
