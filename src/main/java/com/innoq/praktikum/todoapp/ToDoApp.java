@@ -45,70 +45,83 @@ public class ToDoApp {
 
     private void handleAufgabenRequest(HttpExchange exchange) throws IOException {
         if (exchange.getRequestURI().toString().equals("/aufgaben")) {
-            if (exchange.getRequestMethod().equals("GET")) {
-                System.out.println("GET " + exchange.getRequestURI());
-
-                List<Aufgabe> offeneAufgaben = aufgabenListe.offeneAufgaben();
-                System.out.println(offeneAufgaben.size() + " offene Aufgaben gefunden");
-
-                if (exchange.getRequestHeaders().getFirst("Accept").contains("application/json")) {
-                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                    String data = gson.toJson(offeneAufgaben);
-
-                    sendResponse(exchange, 200, "application/json", data);
-
-                } else {
-                    String data = createPlainTextData(offeneAufgaben);
-
-                    sendResponse(exchange, 200, "text/plain", data);
-                }
-
-            } else if (exchange.getRequestMethod().equals("POST")) {
-                System.out.println("POST " + exchange.getRequestURI());
-
-                Map<String, String> formData = readFormData(exchange);
-                aufgabenListe.neueAufgabe(formData.get("bezeichnung"));
-
-                redirectToAufgaben(exchange);
-            }
-
+            handleAufgabenListeRequest(exchange);
         } else if (exchange.getRequestURI().toString().matches("/aufgaben/\\d+")) {
-            System.out.println("POST " + exchange.getRequestURI());
-
-            int id = parseId(exchange.getRequestURI());
-            Map<String, String> formData = readFormData(exchange);
-
-            if (!formData.containsKey("erledigt")) {
-                sendEmptyResponse(exchange, 400);
-                return;
-            }
-
-            Aufgabe zuAenderndeAufgabe = null;
-            for (Aufgabe aufgabe : aufgabenListe.alleAufgaben()) {
-                if (aufgabe.hashCode() == id) {
-                    zuAenderndeAufgabe = aufgabe;
-                    break;
-                }
-            }
-
-            if (zuAenderndeAufgabe == null) {
-                sendEmptyResponse(exchange, 404);
-                return;
-            }
-
-            if (formData.get("erledigt").equals("true")) {
-                zuAenderndeAufgabe.aufgabeerledigen();
-            } else if (formData.get("erledigt").equals("false")) {
-                zuAenderndeAufgabe.aufgabeundo();
-            } else {
-                sendEmptyResponse(exchange, 400);
-                return;
-            }
-
-            redirectToAufgaben(exchange);
-
+            handleEinzelneAufgabeRequest(exchange);
         } else {
             sendEmptyResponse(exchange, 404);
+        }
+    }
+
+    private void handleEinzelneAufgabeRequest(HttpExchange exchange) throws IOException {
+        System.out.println("POST " + exchange.getRequestURI());
+
+        int id = parseId(exchange.getRequestURI());
+        Map<String, String> formData = readFormData(exchange);
+
+        if (!formData.containsKey("erledigt")) {
+            sendEmptyResponse(exchange, 400);
+            return;
+        }
+
+        Aufgabe zuAenderndeAufgabe = null;
+        for (Aufgabe aufgabe : aufgabenListe.alleAufgaben()) {
+            if (aufgabe.hashCode() == id) {
+                zuAenderndeAufgabe = aufgabe;
+                break;
+            }
+        }
+
+        if (zuAenderndeAufgabe == null) {
+            sendEmptyResponse(exchange, 404);
+            return;
+        }
+
+        if (formData.get("erledigt").equals("true")) {
+            zuAenderndeAufgabe.aufgabeerledigen();
+        } else if (formData.get("erledigt").equals("false")) {
+            zuAenderndeAufgabe.aufgabeundo();
+        } else {
+            sendEmptyResponse(exchange, 400);
+            return;
+        }
+
+        redirectToAufgaben(exchange);
+    }
+
+    private void handleAufgabenListeRequest(HttpExchange exchange) throws IOException {
+        if (exchange.getRequestMethod().equals("GET")) {
+            handleGetOffeneAufgaben(exchange);
+        } else if (exchange.getRequestMethod().equals("POST")) {
+            handlePostNeueAufgabe(exchange);
+        }
+    }
+
+    private void handlePostNeueAufgabe(HttpExchange exchange) throws IOException {
+        System.out.println("POST " + exchange.getRequestURI());
+
+        Map<String, String> formData = readFormData(exchange);
+        aufgabenListe.neueAufgabe(formData.get("bezeichnung"));
+
+        redirectToAufgaben(exchange);
+    }
+
+    private void handleGetOffeneAufgaben(HttpExchange exchange) throws IOException {
+        System.out.println("GET " + exchange.getRequestURI());
+
+        List<Aufgabe> offeneAufgaben = aufgabenListe.offeneAufgaben();
+        System.out.println(offeneAufgaben.size() + " offene Aufgaben gefunden");
+
+        if (exchange.getRequestHeaders().getFirst("Accept").contains("application/json")) {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String data = gson.toJson(offeneAufgaben);
+
+            sendResponse(exchange, 200, "application/json", data);
+
+        } else {
+            String data = createPlainTextData(offeneAufgaben);
+
+            sendResponse(exchange, 200, "text/plain", data);
         }
     }
 
