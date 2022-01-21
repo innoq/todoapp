@@ -94,8 +94,14 @@ public class ToDoApp {
         System.out.println("POST " + exchange.getRequestURI());
 
         Map<String, String> formData = readFormData(exchange);
-        aufgabenListe.neueAufgabe(formData.get("bezeichnung"));
-
+        if (formData.containsKey("bezeichnung")
+                && formData.get("bezeichnung").length() > 0
+                && formData.get("bezeichnung").length() <= 20) {
+            aufgabenListe.neueAufgabe(formData.get("bezeichnung"));
+        }
+        else{
+            sendEmptyResponse(exchange, 400);
+        }
         redirectToAufgaben(exchange);
     }
 
