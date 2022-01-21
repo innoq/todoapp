@@ -57,22 +57,15 @@ public class ToDoApp {
                     exchange.sendResponseHeaders(200, 0);
 
                     Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                    String json = gson.toJson(offeneAufgaben);
-                    OutputStream outputStream = exchange.getResponseBody();
-                    PrintWriter writer = new PrintWriter(outputStream);
-                    writer.println(json);
-                    writer.close();
+                    String data = gson.toJson(offeneAufgaben);
+                    writeResponseBody(exchange, data);
 
                 } else {
                     exchange.getResponseHeaders().set("Content-type", "text/plain");
                     exchange.sendResponseHeaders(200, 0);
 
-                    OutputStream outputStream = exchange.getResponseBody();
-                    PrintWriter writer = new PrintWriter(outputStream);
-                    for (Aufgabe aufgabe : offeneAufgaben) {
-                        writer.println(aufgabe);
-                    }
-                    writer.close();
+                    String data = createPlainTextData(offeneAufgaben);
+                    writeResponseBody(exchange, data);
                 }
 
             } else if (exchange.getRequestMethod().equals("POST")) {
@@ -124,6 +117,21 @@ public class ToDoApp {
         } else {
             exchange.sendResponseHeaders(404, -1);
         }
+    }
+
+    private String createPlainTextData(List<Aufgabe> offeneAufgaben) {
+        String data = "";
+        for (Aufgabe aufgabe : offeneAufgaben) {
+            data = data + aufgabe + "\n";
+        }
+        return data;
+    }
+
+    private void writeResponseBody(HttpExchange exchange, String data) {
+        OutputStream outputStream = exchange.getResponseBody();
+        PrintWriter writer = new PrintWriter(outputStream);
+        writer.println(data);
+        writer.close();
     }
 
     private Map<String, String> readFormData(HttpExchange exchange) throws IOException {
