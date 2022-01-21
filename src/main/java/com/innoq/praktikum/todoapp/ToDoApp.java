@@ -40,8 +40,7 @@ public class ToDoApp {
         }
 
         System.out.println(exchange.getRequestURI() + " wurde angefragt");
-        exchange.getResponseHeaders().set("Location", "/aufgaben");
-        exchange.sendResponseHeaders(302, -1);
+        redirectToAufgaben(exchange);
     }
 
     private void handleAufgabenRequest(HttpExchange exchange) throws IOException {
@@ -70,8 +69,7 @@ public class ToDoApp {
                 Map<String, String> formData = readFormData(exchange);
                 aufgabenListe.neueAufgabe(formData.get("bezeichnung"));
 
-                exchange.getResponseHeaders().set("Location", "/aufgaben");
-                exchange.sendResponseHeaders(201, -1);
+                redirectToAufgaben(exchange);
             }
 
         } else if (exchange.getRequestURI().toString().matches("/aufgaben/\\d+")) {
@@ -107,8 +105,7 @@ public class ToDoApp {
                 return;
             }
 
-            exchange.getResponseHeaders().set("Location", "/aufgaben");
-            exchange.sendResponseHeaders(302, -1);
+            redirectToAufgaben(exchange);
 
         } else {
             sendEmptyResponse(exchange, 404);
@@ -123,6 +120,11 @@ public class ToDoApp {
         exchange.getResponseHeaders().set("Content-type", contentType);
         exchange.sendResponseHeaders(statusCode, 0);
         writeResponseBody(exchange, data);
+    }
+
+    private void redirectToAufgaben(HttpExchange exchange) throws IOException {
+        exchange.getResponseHeaders().set("Location", "/aufgaben");
+        exchange.sendResponseHeaders(302, -1);
     }
 
     private String createPlainTextData(List<Aufgabe> offeneAufgaben) {
