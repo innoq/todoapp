@@ -111,6 +111,7 @@ public class ToDoApp {
             System.out.println("Weekend started");
             for (Aufgabe aufgabe : aufgabenListe.offeneAufgaben()) {
                 aufgabe.aufgabeerledigen();
+                //easter egg
             }
         } else {
             sendEmptyResponse(exchange, 400);
