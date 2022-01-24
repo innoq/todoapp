@@ -4,6 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.context.IContext;
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -44,12 +48,17 @@ public class ToDoApp {
     }
 
     private void handleAufgabenRequest(HttpExchange exchange) throws IOException {
-        if (exchange.getRequestURI().toString().equals("/aufgaben")) {
-            handleAufgabenListeRequest(exchange);
-        } else if (exchange.getRequestURI().toString().matches("/aufgaben/\\d+")) {
-            handleEinzelneAufgabeRequest(exchange);
-        } else {
-            sendEmptyResponse(exchange, 404);
+        try {
+            if (exchange.getRequestURI().toString().equals("/aufgaben")) {
+                handleAufgabenListeRequest(exchange);
+            } else if (exchange.getRequestURI().toString().matches("/aufgaben/\\d+")) {
+                handleEinzelneAufgabeRequest(exchange);
+            } else {
+                sendEmptyResponse(exchange, 404);
+            }
+        } catch (Throwable exc) {
+            System.out.println(exc.toString());
+            sendEmptyResponse(exchange, 500);
         }
     }
 
@@ -98,15 +107,12 @@ public class ToDoApp {
                 && formData.get("bezeichnung").length() > 0
                 && formData.get("bezeichnung").length() <= 20) {
             aufgabenListe.neueAufgabe(formData.get("bezeichnung"));
-        }
-        else if (formData.containsKey("weekend")&&formData.get("weekend").equals("true")) {
+        } else if (formData.containsKey("weekend") && formData.get("weekend").equals("true")) {
             System.out.println("Weekend started");
             for (Aufgabe aufgabe : aufgabenListe.offeneAufgaben()) {
                 aufgabe.aufgabeerledigen();
             }
-        }
-
-        else{
+        } else {
             sendEmptyResponse(exchange, 400);
         }
         redirectToAufgaben(exchange);
@@ -118,7 +124,14 @@ public class ToDoApp {
         List<Aufgabe> offeneAufgaben = aufgabenListe.offeneAufgaben();
         System.out.println(offeneAufgaben.size() + " offene Aufgaben gefunden");
 
-        if (exchange.getRequestHeaders().getFirst("Accept").contains("application/json")) {
+        if (exchange.getRequestHeaders().getFirst("Accept").contains("text/html")) {
+            TemplateEngine templateEngine = new TemplateEngine();
+            templateEngine.setTemplateResolver(new ClassLoaderTemplateResolver());
+            IContext context = new Context(Locale.getDefault(), Map.of());
+            String data = templateEngine.process("templates/aufgabenliste.html", context);
+            sendResponse(exchange, 200, "text/html", data);
+
+        } else if (exchange.getRequestHeaders().getFirst("Accept").contains("application/json")) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String data = gson.toJson(offeneAufgaben);
 
