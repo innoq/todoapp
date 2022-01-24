@@ -8,6 +8,10 @@ public class Aufgabe {
         this.erledigt = erledigt;
     }
 
+    public String getBezeichnung() {
+        return bezeichnung;
+    }
+
     public int getId() {
         return hashCode();
     }

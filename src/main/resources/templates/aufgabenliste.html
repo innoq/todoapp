@@ -14,14 +14,8 @@
 </h2>
 
 <ul>
-    <li>
-        Aufgabe 1
-    </li>
-    <li>
-        Aufgabe 2
-    </li>
-    <li>
-        Aufgabe 3
+    <li th:each="aufg: ${alleOffenenAufgaben}" th:text="${aufg.bezeichnung}">
+        Aufgabe
     </li>
 </ul>
 
