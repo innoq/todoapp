@@ -13,11 +13,13 @@
     Offene Aufgaben
 </h2>
 
-<ul>
+<ul th:if="${!alleOffenenAufgaben.empty}">
     <li th:each="aufg: ${alleOffenenAufgaben}" th:text="${aufg.bezeichnung}">
         Aufgabe
     </li>
 </ul>
+
+<p th:if="${alleOffenenAufgaben.empty}">Du hast noch keine offenen Aufgaben</p>
 
 </body>
 </html>
