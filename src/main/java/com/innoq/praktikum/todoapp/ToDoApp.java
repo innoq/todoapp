@@ -128,7 +128,7 @@ public class ToDoApp {
         if (exchange.getRequestHeaders().getFirst("Accept").contains("text/html")) {
             TemplateEngine templateEngine = new TemplateEngine();
             templateEngine.setTemplateResolver(new ClassLoaderTemplateResolver());
-            IContext context = new Context(Locale.getDefault(), Map.of());
+            IContext context = new Context(Locale.GERMAN, Map.of("alleOffenenAufgaben", offeneAufgaben));
             String data = templateEngine.process("templates/aufgabenliste.html", context);
             sendResponse(exchange, 200, "text/html", data);
 
