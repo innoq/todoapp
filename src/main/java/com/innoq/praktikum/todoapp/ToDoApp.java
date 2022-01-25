@@ -36,9 +36,14 @@ public class ToDoApp {
     public void start() throws IOException {
         HttpServer httpServer = HttpServer.create(new InetSocketAddress(8080), 0);
         httpServer.createContext("/aufgaben", this::handleAufgabenRequest);
+        httpServer.createContext("/health", this::healthHandler);
         httpServer.createContext("/", this::handleRootRequest);
         httpServer.start();
         System.out.println("HTTP Server auf Port 8080 gestartet");
+    }
+
+    private void healthHandler(HttpExchange exchange) throws IOException {
+        sendResponse(exchange, 200, "text/plain", "I'm fine");
     }
 
     private void handleRootRequest(HttpExchange exchange) throws IOException {

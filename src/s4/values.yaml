@@ -1,0 +1,26 @@
+image:
+  repository: gitlabregistry.innoq.com/innoq/praktika/todoapp
+  tag: latest
+  pullSecret: s4-gitlab-registry
+
+owner: torsten.mandry@innoq.com
+gitRepo: https://gitlab.innoq.com/innoq/praktika/todoapp
+port: 8080
+healthPath: /health
+initialHealthCheckDelay: 2
+replicaCount: 1
+secureBackend: false
+
+#restrictAccess:
+#  allowGroups:
+#    - Mitarbeiter
+
+resources:
+  limits:
+    memory: 256Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+ingress:
+  dns: todoapp.apps.innoq.io

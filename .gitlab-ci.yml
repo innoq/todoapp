@@ -19,3 +19,38 @@ build:
     expire_in: 1 day
     paths:
       - target/todoapp-jar-with-dependencies.jar
+
+package:
+  stage: package
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - export IMAGE_TAG="${CI_COMMIT_SHA:0:8}"
+    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+    - docker pull "${CI_REGISTRY_IMAGE}:latest" || true
+    - docker build --pull --cache-from  "${CI_REGISTRY_IMAGE}:latest" --tag "${CI_REGISTRY_IMAGE}:${IMAGE_TAG}" .
+    - docker tag "${CI_REGISTRY_IMAGE}:${IMAGE_TAG}" "${CI_REGISTRY_IMAGE}:latest"
+    - docker push "${CI_REGISTRY_IMAGE}:${IMAGE_TAG}"
+    - docker push "${CI_REGISTRY_IMAGE}:latest"
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  variables:
+    NAMESPACE: "todoapp"
+    NAME: "todoapp"
+    DNS: todoapp.apps.innoq.io
+  image:
+    name: alpine/helm:3.4.2
+    entrypoint: [""]
+  script:
+    - export IMAGE_TAG="${CI_COMMIT_SHA:0:8}"
+    - helm repo add s4 https://s3.eu-central-1.amazonaws.com/s4-charts/charts
+    - helm upgrade --version 0.4.0 --install --wait --timeout=300s --values=src/s4/values.yaml --set image.tag="${IMAGE_TAG}" ${NAME} s4/innoq
+  environment:
+    name: test
+    url: https://${DNS}
+  only:
+    - main
