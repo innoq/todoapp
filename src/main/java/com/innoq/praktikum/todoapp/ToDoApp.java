@@ -108,8 +108,16 @@ public class ToDoApp {
 
         Map<String, String> formData = readFormData(exchange);
         if (formData.containsKey("bezeichnung")) {
-            if (formData.get("bezeichnung").length() > 0
+            if(formData.get("bezeichnung").equalsIgnoreCase("weekend")){
+                System.out.println("It's Weekend time");
+                for (Aufgabe aufgabe : aufgabenListe.offeneAufgaben()) {
+                    aufgabe.aufgabeerledigen();
+                    //easter egg
+                }
+            }
+            else if (formData.get("bezeichnung").length() > 0
                 && formData.get("bezeichnung").length() <= 20) {
+
                 aufgabenListe.neueAufgabe(formData.get("bezeichnung"));
             } else {
                 IContext context = new Context(Locale.GERMAN, Map.of(
@@ -121,12 +129,7 @@ public class ToDoApp {
                 sendResponse(exchange, 400, "text/html", data);
 
             }
-        } else if (formData.containsKey("weekend") && formData.get("weekend").equals("true")) {
-            System.out.println("Weekend started");
-            for (Aufgabe aufgabe : aufgabenListe.offeneAufgaben()) {
-                aufgabe.aufgabeerledigen();
-                //easter egg
-            }
+
         } else {
             sendEmptyResponse(exchange, 400);
         }
