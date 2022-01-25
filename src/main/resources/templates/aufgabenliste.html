@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>ToDoApp</title>
+    <style>
+        p.warning {
+            color: red;
+        }
+    </style>
 </head>
 <body>
     <center>
@@ -22,10 +27,11 @@
 <p th:if="${alleOffenenAufgaben.empty}">Du hast noch keine offenen Aufgaben</p>
 
 <form method="post">
+    <p class="warning" th:if="${fehlermeldung != null}" th:text="${fehlermeldung}"></p>
     <button type="submit">
         Aufgabe Hinzufügen
     </button>
-    <input type="text" name="bezeichnung">
+    <input type="text" name="bezeichnung" th:value="${bezeichnung}" minlength="1" maxlength="20">
 </form>
 
 </body>

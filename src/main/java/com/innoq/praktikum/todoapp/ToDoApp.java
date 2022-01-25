@@ -19,9 +19,13 @@ import java.util.*;
 public class ToDoApp {
 
     private AufgabenListe aufgabenListe;
+    private TemplateEngine templateEngine;
 
     public ToDoApp() {
         aufgabenListe = new AufgabenListe();
+
+        templateEngine = new TemplateEngine();
+        templateEngine.setTemplateResolver(new ClassLoaderTemplateResolver());
     }
 
     public static void main(String[] args) throws IOException {
@@ -103,10 +107,20 @@ public class ToDoApp {
         System.out.println("POST " + exchange.getRequestURI());
 
         Map<String, String> formData = readFormData(exchange);
-        if (formData.containsKey("bezeichnung")
-                && formData.get("bezeichnung").length() > 0
+        if (formData.containsKey("bezeichnung")) {
+            if (formData.get("bezeichnung").length() > 0
                 && formData.get("bezeichnung").length() <= 20) {
-            aufgabenListe.neueAufgabe(formData.get("bezeichnung"));
+                aufgabenListe.neueAufgabe(formData.get("bezeichnung"));
+            } else {
+                IContext context = new Context(Locale.GERMAN, Map.of(
+                        "alleOffenenAufgaben", this.aufgabenListe.offeneAufgaben(),
+                        "bezeichnung", formData.get("bezeichnung"),
+                        "fehlermeldung", "Du musst eine Aufgabenbezeichnung zwischen 1 und 20 Zeichen angeben"
+                ));
+                String data = templateEngine.process("templates/aufgabenliste.html", context);
+                sendResponse(exchange, 400, "text/html", data);
+
+            }
         } else if (formData.containsKey("weekend") && formData.get("weekend").equals("true")) {
             System.out.println("Weekend started");
             for (Aufgabe aufgabe : aufgabenListe.offeneAufgaben()) {
@@ -126,8 +140,6 @@ public class ToDoApp {
         System.out.println(offeneAufgaben.size() + " offene Aufgaben gefunden");
 
         if (exchange.getRequestHeaders().getFirst("Accept").contains("text/html")) {
-            TemplateEngine templateEngine = new TemplateEngine();
-            templateEngine.setTemplateResolver(new ClassLoaderTemplateResolver());
             IContext context = new Context(Locale.GERMAN, Map.of("alleOffenenAufgaben", offeneAufgaben));
             String data = templateEngine.process("templates/aufgabenliste.html", context);
             sendResponse(exchange, 200, "text/html", data);
