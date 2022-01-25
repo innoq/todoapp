@@ -66,7 +66,7 @@ public class ToDoApp {
                 sendEmptyResponse(exchange, 404);
             }
         } catch (Throwable exc) {
-            System.out.println(exc.toString());
+            exc.printStackTrace(System.err);
             sendEmptyResponse(exchange, 500);
         }
     }
@@ -89,9 +89,9 @@ public class ToDoApp {
         }
 
         if (formData.get("erledigt").equals("true")) {
-            zuAenderndeAufgabe.aufgabeerledigen();
+            aufgabenListe.alsErledigtAbhaken(zuAenderndeAufgabe);
         } else if (formData.get("erledigt").equals("false")) {
-            zuAenderndeAufgabe.aufgabeundo();
+            aufgabenListe.aufNichtErledigtZuruecksetzen(zuAenderndeAufgabe);
         } else {
             sendEmptyResponse(exchange, 400);
             return;
@@ -116,7 +116,7 @@ public class ToDoApp {
             if(formData.get("bezeichnung").equalsIgnoreCase("weekend")){
                 System.out.println("It's Weekend time");
                 for (Aufgabe aufgabe : aufgabenListe.offeneAufgaben()) {
-                    aufgabe.aufgabeerledigen();
+                    aufgabenListe.alsErledigtAbhaken(aufgabe);
                     //easter egg
                 }
             }

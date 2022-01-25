@@ -3,17 +3,23 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Aufgabe {
+    private int id;
     private String bezeichnung;
     private boolean erledigt;
     private  LocalDateTime  erstellzeit;
 
-    public Aufgabe(String bezeichnung, boolean erledigt) {
-
+    public Aufgabe(int id, String bezeichnung, boolean erledigt) {
+        this.id = id;
         this.bezeichnung = bezeichnung;
         this.erledigt = erledigt;
         this.erstellzeit = LocalDateTime.now();
+    }
 
-
+    public Aufgabe(int id, String bezeichnung, boolean erledigt, LocalDateTime erstellzeit) {
+        this.id = id;
+        this.bezeichnung = bezeichnung;
+        this.erledigt = erledigt;
+        this.erstellzeit = erstellzeit;
     }
 
     public LocalDateTime getErstellzeit() {
@@ -30,7 +36,7 @@ public class Aufgabe {
     }
 
     public int getId() {
-        return hashCode();
+        return id;
     }
 
     public void aufgabeerledigen() {

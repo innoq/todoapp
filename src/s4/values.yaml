@@ -3,6 +3,11 @@ image:
   tag: latest
   pullSecret: s4-gitlab-registry
 
+env:
+  - { name: DATABASE_URL, value: "jdbc:postgresql://todoapp-db.cffrlivljgmr.eu-central-1.rds.amazonaws.com:5432/todoapp" }
+  - { name: DATABASE_USERNAME, value: "todoapp" }
+  - { name: DATABASE_PASSWORD, value: "todoapp" }
+
 owner: torsten.mandry@innoq.com
 gitRepo: https://gitlab.innoq.com/innoq/praktika/todoapp
 port: 8080
