@@ -1,12 +1,29 @@
 package com.innoq.praktikum.todoapp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Aufgabe {
     private String bezeichnung;
     private boolean erledigt;
+    private  LocalDateTime  erstellzeit;
+
     public Aufgabe(String bezeichnung, boolean erledigt) {
+
         this.bezeichnung = bezeichnung;
         this.erledigt = erledigt;
+        this.erstellzeit = LocalDateTime.now();
+
+
     }
+
+    public LocalDateTime getErstellzeit() {
+        return erstellzeit;
+    }
+
+    public String getFormattedErstellzeit() {
+        return erstellzeit.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+    }
+
 
     public String getBezeichnung() {
         return bezeichnung;

@@ -13,10 +13,11 @@
         }
 
         button.erledigen {
-            background-color: white;
+            background-color: #FBFA9B;
             border: 0;
             font-size: larger;
         }
+        body {background-color:#FBFA9B;}
     </style>
 </head>
 <body>
@@ -31,9 +32,10 @@
 <ul th:if="${!alleOffenenAufgaben.empty}">
     <li th:each="aufg: ${alleOffenenAufgaben}">
         <form method="post" th:action="${'/aufgaben/' + aufg.id}">
-            <button type="submit" class="erledigen" aria-label="Aufgabe abhaken">&#9744;</button>  <!--Alternativ❎, sonst &#9744-->
+            <button type="submit" class="erledigen" aria-label="Aufgabe abhaken">❎</button>  <!--Alternativ❎, sonst &#9744-->
             <input type="hidden" name="erledigt" value="true">
             <span th:text="${aufg.bezeichnung}">Aufgabe</span>
+            <span th:text="${aufg.formattedErstellzeit}">Erstellzeit</span>
         </form>
     </li>
 </ul>
