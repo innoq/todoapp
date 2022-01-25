@@ -34,7 +34,7 @@ package:
     - docker push "${CI_REGISTRY_IMAGE}:${IMAGE_TAG}"
     - docker push "${CI_REGISTRY_IMAGE}:latest"
   only:
-    - main
+    - master
 
 deploy:
   stage: deploy
@@ -53,4 +53,4 @@ deploy:
     name: test
     url: https://${DNS}
   only:
-    - main
+    - master
