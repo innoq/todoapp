@@ -7,6 +7,16 @@
         p.warning {
             color: red;
         }
+
+        ul {
+            list-style-type: none;
+        }
+
+        button.erledigen {
+            background-color: white;
+            border: 0;
+            font-size: larger;
+        }
     </style>
 </head>
 <body>
@@ -19,8 +29,12 @@
 </h2>
 
 <ul th:if="${!alleOffenenAufgaben.empty}">
-    <li th:each="aufg: ${alleOffenenAufgaben}" th:text="${aufg.bezeichnung}">
-        Aufgabe
+    <li th:each="aufg: ${alleOffenenAufgaben}">
+        <form method="post" th:action="${'/aufgaben/' + aufg.id}">
+            <button type="submit" class="erledigen" aria-label="Aufgabe abhaken">&#9744;</button>  <!--Alternativ❎, sonst &#9744-->
+            <input type="hidden" name="erledigt" value="true">
+            <span th:text="${aufg.bezeichnung}">Aufgabe</span>
+        </form>
     </li>
 </ul>
 
