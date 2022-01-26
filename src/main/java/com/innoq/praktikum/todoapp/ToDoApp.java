@@ -39,6 +39,7 @@ public class ToDoApp {
     public void start() throws IOException {
         HttpServer httpServer = HttpServer.create(new InetSocketAddress(8080), 0);
         httpServer.createContext("/login", this::handleLoginRequest);
+        httpServer.createContext("/logout", this::handleLogoutRequest);
         httpServer.createContext("/aufgaben", this::handleAufgabenRequest);
         httpServer.createContext("/health", this::handleHealthRequest);
         httpServer.createContext("/", this::handleRootRequest);
@@ -96,6 +97,24 @@ public class ToDoApp {
         exchange.getResponseHeaders().add("Set-Cookie", "user=" + name);
 
         redirectToAufgaben(exchange);
+    }
+
+    private void handleLogoutRequest(HttpExchange exchange) throws IOException {
+        System.out.println(exchange.getRequestMethod() + " " + exchange.getRequestURI());
+
+        if (!exchange.getRequestURI().toString().equals("/logout")) {
+            sendEmptyResponse(exchange, 404);
+            return;
+        }
+        if (!exchange.getRequestMethod().equals("POST")) {
+            sendEmptyResponse(exchange, 405);
+            return;
+        }
+
+        var cookie = exchange.getRequestHeaders().getFirst("Cookie");
+        exchange.getResponseHeaders().add("Set-Cookie", cookie + "; Max-Age=0");
+
+        redirectToLogin(exchange);
     }
 
     private void handleHealthRequest(HttpExchange exchange) throws IOException {
