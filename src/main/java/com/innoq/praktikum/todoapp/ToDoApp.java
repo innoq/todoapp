@@ -18,11 +18,14 @@ import java.util.*;
 
 public class ToDoApp {
 
-    private AufgabenListe aufgabenListe;
-    private TemplateEngine templateEngine;
+    private final AufgabenListe aufgabenListe;
+    private final Gson gson;
+    private final TemplateEngine templateEngine;
 
     public ToDoApp() {
         aufgabenListe = new AufgabenListe();
+
+        gson = new GsonBuilder().setPrettyPrinting().create();
 
         templateEngine = new TemplateEngine();
         templateEngine.setTemplateResolver(new ClassLoaderTemplateResolver());
@@ -150,7 +153,6 @@ public class ToDoApp {
             sendResponse(exchange, 200, "text/html", data);
 
         } else if (exchange.getRequestHeaders().getFirst("Accept").contains("application/json")) {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String data = gson.toJson(offeneAufgaben);
 
             sendResponse(exchange, 200, "application/json", data);
