@@ -38,11 +38,64 @@ public class ToDoApp {
 
     public void start() throws IOException {
         HttpServer httpServer = HttpServer.create(new InetSocketAddress(8080), 0);
+        httpServer.createContext("/login", this::handleLoginRequest);
         httpServer.createContext("/aufgaben", this::handleAufgabenRequest);
         httpServer.createContext("/health", this::handleHealthRequest);
         httpServer.createContext("/", this::handleRootRequest);
         httpServer.start();
         System.out.println("HTTP Server auf Port 8080 gestartet");
+    }
+
+    private void handleLoginRequest(HttpExchange exchange) throws IOException {
+        System.out.println(exchange.getRequestMethod() + " " + exchange.getRequestURI());
+
+        if (!exchange.getRequestURI().toString().equals("/login")) {
+            sendEmptyResponse(exchange, 404);
+            return;
+        }
+
+        if (exchange.getRequestMethod().equals("GET")) {
+            handleGetLoginFormRequest(exchange);
+        } else if (exchange.getRequestMethod().equals("POST")) {
+            handlePostLoginFormRequest(exchange);
+        } else {
+            sendEmptyResponse(exchange, 405);
+        }
+    }
+
+    private void handleGetLoginFormRequest(HttpExchange exchange) throws IOException {
+        String body = templateEngine.process("templates/login.html", new Context(Locale.getDefault()));
+        sendResponse(exchange, 200, "text/html", body);
+    }
+
+    private void handlePostLoginFormRequest(HttpExchange exchange) throws IOException {
+        Map<String, String> formData = readFormData(exchange);
+        String name = formData.get("name");
+        if (name == null || name.isEmpty()) {
+            Context context = new Context(Locale.getDefault(),
+                    Map.of("error", "Du musst einen Namen eingeben"));
+            String body = templateEngine.process("templates/login.html", context);
+            sendResponse(exchange, 400, "text/html", body);
+            return;
+        }
+        if (name.length() < 3 || name.length() > 20) {
+            Context context = new Context(Locale.getDefault(),
+                    Map.of("error", "Der Name muss mindestens 3 und maximal 20 Zeichen lang sein"));
+            String body = templateEngine.process("templates/login.html", context);
+            sendResponse(exchange, 400, "text/html", body);
+            return;
+        }
+        if (!name.matches("[A-Za-z0-9_]*")) {
+            Context context = new Context(Locale.getDefault(),
+                    Map.of("error", "Der Name darf nur Buchstaben (A-Z, groß oder klein), Ziffern (0-9) sowie den Unterstrich (_) enthalten"));
+            String body = templateEngine.process("templates/login.html", context);
+            sendResponse(exchange, 400, "text/html", body);
+            return;
+        }
+
+        exchange.getResponseHeaders().add("Set-Cookie", "user=" + name);
+
+        redirectToAufgaben(exchange);
     }
 
     private void handleHealthRequest(HttpExchange exchange) throws IOException {
@@ -62,6 +115,11 @@ public class ToDoApp {
 
     private void handleAufgabenRequest(HttpExchange exchange) throws IOException {
         System.out.println(exchange.getRequestMethod() + " " + exchange.getRequestURI());
+
+        if (notContainsValidCookie(exchange)) {
+            redirectToLogin(exchange);
+            return;
+        }
 
         try {
             if (exchange.getRequestURI().toString().equals("/aufgaben")) {
@@ -144,11 +202,15 @@ public class ToDoApp {
     }
 
     private void handleGetOffeneAufgaben(HttpExchange exchange) throws IOException {
+        String user = readUserFromCookie(exchange);
+
         List<Aufgabe> offeneAufgaben = aufgabenListe.offeneAufgaben();
         System.out.println(offeneAufgaben.size() + " offene Aufgaben gefunden");
 
         if (exchange.getRequestHeaders().getFirst("Accept").contains("text/html")) {
-            IContext context = new Context(Locale.GERMAN, Map.of("alleOffenenAufgaben", offeneAufgaben));
+            IContext context = new Context(Locale.GERMAN, Map.of(
+                    "user", user,
+                    "alleOffenenAufgaben", offeneAufgaben));
             String data = templateEngine.process("templates/aufgabenliste.html", context);
             sendResponse(exchange, 200, "text/html", data);
 
@@ -172,6 +234,11 @@ public class ToDoApp {
         exchange.getResponseHeaders().set("Content-type", contentType);
         exchange.sendResponseHeaders(statusCode, 0);
         writeResponseBody(exchange, data);
+    }
+
+    private void redirectToLogin(HttpExchange exchange) throws IOException {
+        exchange.getResponseHeaders().add("Location", "/login");
+        exchange.sendResponseHeaders(302, -1);
     }
 
     private void redirectToAufgaben(HttpExchange exchange) throws IOException {
@@ -236,5 +303,25 @@ public class ToDoApp {
         return map;
     }
 
+    private boolean notContainsValidCookie(HttpExchange exchange) throws IOException {
+        String cookie = exchange.getRequestHeaders().getFirst("Cookie");
+
+        if (cookie == null || cookie.isEmpty()) {
+            System.out.println("Kein Cookie");
+            return true;
+        }
+
+        if (!cookie.matches("user=[A-Za-z0-9_]{3,20}")) {
+            System.out.println("Ungültiger Cookie: " + cookie);
+            return true;
+        }
+
+        return false;
+    }
+
+    private String readUserFromCookie(HttpExchange exchange) {
+        String cookie = exchange.getRequestHeaders().getFirst("Cookie");
+        return cookie.substring(5);
+    }
 
 }
