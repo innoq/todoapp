@@ -6,3 +6,5 @@ CREATE TABLE aufgaben (
     erstellzeit     TIMESTAMP   NOT NULL,
     erledigt        BOOLEAN     NOT NULL
 );
+
+ALTER TABLE aufgaben ADD COLUMN besitzer VARCHAR;

@@ -137,6 +137,7 @@ public class ToDoApp {
 
     private void handleEinzelneAufgabeRequest(HttpExchange exchange) throws IOException {
         int id = parseId(exchange.getRequestURI());
+        String user = readUserFromCookie(exchange);
         Map<String, String> formData = readFormData(exchange);
 
         if (!formData.containsKey("erledigt")) {
@@ -144,7 +145,7 @@ public class ToDoApp {
             return;
         }
 
-        Aufgabe zuAenderndeAufgabe = aufgabenListe.findAufgabeById(id);
+        Aufgabe zuAenderndeAufgabe = aufgabenListe.findAufgabeByUserAndId(user, id);
         if (zuAenderndeAufgabe == null) {
             sendEmptyResponse(exchange, 404);
             return;
@@ -171,11 +172,13 @@ public class ToDoApp {
     }
 
     private void handlePostNeueAufgabe(HttpExchange exchange) throws IOException {
+        String user = readUserFromCookie(exchange);
+
         Map<String, String> formData = readFormData(exchange);
         if (formData.containsKey("bezeichnung")) {
             if(formData.get("bezeichnung").equalsIgnoreCase("weekend")){
                 System.out.println("It's Weekend time");
-                for (Aufgabe aufgabe : aufgabenListe.offeneAufgaben()) {
+                for (Aufgabe aufgabe : aufgabenListe.findOffeneAufgabenForUser(user)) {
                     aufgabenListe.alsErledigtAbhaken(aufgabe);
                     //easter egg
                 }
@@ -183,10 +186,10 @@ public class ToDoApp {
             else if (formData.get("bezeichnung").length() > 0
                 && formData.get("bezeichnung").length() <= 20) {
 
-                aufgabenListe.neueAufgabe(formData.get("bezeichnung"));
+                aufgabenListe.neueAufgabeForUser(user, formData.get("bezeichnung"));
             } else {
                 IContext context = new Context(Locale.GERMAN, Map.of(
-                        "alleOffenenAufgaben", this.aufgabenListe.offeneAufgaben(),
+                        "alleOffenenAufgaben", this.aufgabenListe.findOffeneAufgabenForUser(user),
                         "bezeichnung", formData.get("bezeichnung"),
                         "fehlermeldung", "Du musst eine Aufgabenbezeichnung zwischen 1 und 20 Zeichen angeben"
                 ));
@@ -204,7 +207,7 @@ public class ToDoApp {
     private void handleGetOffeneAufgaben(HttpExchange exchange) throws IOException {
         String user = readUserFromCookie(exchange);
 
-        List<Aufgabe> offeneAufgaben = aufgabenListe.offeneAufgaben();
+        List<Aufgabe> offeneAufgaben = aufgabenListe.findOffeneAufgabenForUser(user);
         System.out.println(offeneAufgaben.size() + " offene Aufgaben gefunden");
 
         if (exchange.getRequestHeaders().getFirst("Accept").contains("text/html")) {
