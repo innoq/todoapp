@@ -159,7 +159,7 @@ public class AufgabenListe {
 
     private ArrayList<Aufgabe> readErledigteAufgabenFromDatabase(String user) {
         try (var statement = this.dbConnection.prepareStatement(
-                "SELECT id, besitzer, bezeichnung, erstellzeit, erledigt FROM aufgaben WHERE besitzer = ? AND erledigt = true")) {
+                "SELECT id, besitzer, bezeichnung, erstellzeit, deadline, erledigt FROM aufgaben WHERE besitzer = ? AND erledigt = true")) {
             statement.setString(1, user);
             var resultSet = statement.executeQuery();
             var erledigteaufgaben = new ArrayList<Aufgabe>();
@@ -168,8 +168,14 @@ public class AufgabenListe {
                 var besitzer = resultSet.getString("besitzer");
                 var bezeichnung = resultSet.getString("bezeichnung");
                 var erstellzeit = resultSet.getTimestamp("erstellzeit").toLocalDateTime();
+                var deadline = resultSet.getDate("deadline");
                 var erledigt = resultSet.getBoolean("erledigt");
-                erledigteaufgaben.add(new Aufgabe(id, besitzer, bezeichnung, erstellzeit, erledigt));
+                if (deadline != null) {
+                    erledigteaufgaben.add(new Aufgabe(id, besitzer, bezeichnung, erstellzeit, deadline.toLocalDate(), erledigt));
+                }
+                else{
+                    erledigteaufgaben.add(new Aufgabe(id, besitzer, bezeichnung, erstellzeit, null, erledigt));
+                }
             }
             return erledigteaufgaben;
         } catch (SQLException exc) {
