@@ -32,6 +32,7 @@
             <form method="post" th:action="${'/aufgaben/' + aufg.id}">
                 <button type="submit" class="undo" aria-label="Undo Aufgabe">⛔️</button> ️ <!--Alternativ❎, sonst &#9744-->
                 <input type="hidden" name="erledigt" value="false">
+                <input type="hidden" name="forwardUrl" value="/erledigt">
                 <span th:text="${aufg.bezeichnung}">Aufgabe</span>
                 <span th:text="${aufg.formattedErstellzeit}">Erstellzeit</span>
             </form>

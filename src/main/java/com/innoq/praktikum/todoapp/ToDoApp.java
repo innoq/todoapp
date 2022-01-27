@@ -209,7 +209,12 @@ public class ToDoApp {
             return;
         }
 
-        redirectToAufgaben(exchange);
+        if (formData.containsKey("forwardUrl")) {
+            String referrer = formData.get("forwardUrl");
+            redirectTo(exchange, referrer);
+        } else {
+            redirectToAufgaben(exchange);
+        }
     }
 
     private void handleAufgabenListeRequest(HttpExchange exchange) throws IOException {
@@ -304,6 +309,11 @@ public class ToDoApp {
 
     private void redirectToAufgaben(HttpExchange exchange) throws IOException {
         exchange.getResponseHeaders().set("Location", "/aufgaben");
+        exchange.sendResponseHeaders(302, -1);
+    }
+
+    private void redirectTo(HttpExchange exchange, String url) throws IOException {
+        exchange.getResponseHeaders().set("Location", url);
         exchange.sendResponseHeaders(302, -1);
     }
 
