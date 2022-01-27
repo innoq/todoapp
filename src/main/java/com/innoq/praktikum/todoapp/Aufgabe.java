@@ -9,6 +9,7 @@ public class Aufgabe {
     private final String besitzer;
     private final String bezeichnung;
     private final LocalDateTime erstellzeit;
+    private LocalDateTime endzeit;
     private LocalDate deadline;
     private boolean erledigt;
 
@@ -19,15 +20,17 @@ public class Aufgabe {
         this.erstellzeit = LocalDateTime.now();
         this.erledigt = false;
         this.deadline = deadline;
+        this.endzeit = null;
     }
 
-    public Aufgabe(int id, String besitzer, String bezeichnung, LocalDateTime erstellzeit, LocalDate deadline, boolean erledigt) {
+    public Aufgabe(int id, String besitzer, String bezeichnung, LocalDateTime erstellzeit, LocalDate deadline, boolean erledigt, LocalDateTime endzeit) {
         this.id = id;
         this.besitzer = besitzer;
         this.bezeichnung = bezeichnung;
         this.erstellzeit = erstellzeit;
         this.deadline = deadline;
         this.erledigt = erledigt;
+        this.endzeit = endzeit;
     }
 
     public LocalDateTime getErstellzeit() {
@@ -61,10 +64,16 @@ public class Aufgabe {
 
     public void aufgabeerledigen() {
         this.erledigt = true;
+        this.endzeit = LocalDateTime.now();
+    }
+
+    public LocalDateTime getEndzeit() {
+        return endzeit;
     }
 
     public void aufgabeundo() {
         this.erledigt = false;
+        this.endzeit = null;
     }
 
     public boolean isErledigt() {

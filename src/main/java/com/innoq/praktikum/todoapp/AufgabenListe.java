@@ -36,7 +36,7 @@ public class AufgabenListe {
     public void alsErledigtAbhaken(Aufgabe aufgabe) {
         aufgabe.aufgabeerledigen();
         updateAufgabeInDatabase(aufgabe);
-        System.out.println("Aufgabe '" + aufgabe.getBezeichnung() + "' als erledigt abgehakt");
+        System.out.println("Aufgabe '" + aufgabe.getBezeichnung() + "' als erledigt abgehakt (" +aufgabe.getEndzeit()+ ")");
     }
 
     public void aufNichtErledigtZuruecksetzen(Aufgabe aufgabe) {
@@ -91,7 +91,7 @@ public class AufgabenListe {
 
     private ArrayList<Aufgabe> readOffeneAufgabenFromDatabase(String user) {
         try (var statement = this.dbConnection.prepareStatement(
-                "SELECT id, besitzer, bezeichnung, erstellzeit, deadline, erledigt FROM aufgaben WHERE besitzer = ? AND erledigt = false")) {
+                "SELECT * FROM aufgaben WHERE besitzer = ? AND erledigt = false")) {
             statement.setString(1, user);
             var resultSet = statement.executeQuery();
             var aufgaben = new ArrayList<Aufgabe>();
@@ -106,7 +106,7 @@ public class AufgabenListe {
 
     private Aufgabe readAufgabeFromDatabase(String user, int id) {
         try (var statement = this.dbConnection.prepareStatement(
-                "SELECT id, besitzer, bezeichnung, erstellzeit, deadline, erledigt FROM aufgaben WHERE id = ? AND besitzer = ?")) {
+                "SELECT * FROM aufgaben WHERE id = ? AND besitzer = ?")) {
             statement.setInt(1, id);
             statement.setString(2, user);
             var resultSet = statement.executeQuery();
@@ -126,19 +126,22 @@ public class AufgabenListe {
         var erstellzeit = resultSet.getTimestamp("erstellzeit").toLocalDateTime();
         var deadline = resultSet.getDate("deadline");
         var erledigt = resultSet.getBoolean("erledigt");
+        var endzeitTimeStamp =resultSet.getTimestamp("endzeit");
+        var endzeit = endzeitTimeStamp!=null ? endzeitTimeStamp.toLocalDateTime() : null;
         if (deadline != null) {
-            return new Aufgabe(idFromDB, besitzer, bezeichnung, erstellzeit, deadline.toLocalDate(), erledigt);
+            return new Aufgabe(idFromDB, besitzer, bezeichnung, erstellzeit,  deadline.toLocalDate(), erledigt, endzeit);
         }
         else{
-            return new Aufgabe(idFromDB, besitzer, bezeichnung, erstellzeit, null, erledigt);
+            return new Aufgabe(idFromDB, besitzer, bezeichnung, erstellzeit, null, erledigt, endzeit);
         }
     }
 
     private void updateAufgabeInDatabase(Aufgabe aufgabe) {
         try (var statement = this.dbConnection.prepareStatement(
-                "UPDATE aufgaben SET erledigt = ? WHERE id = ?")) {
+                "UPDATE aufgaben SET erledigt = ?, endzeit = ? WHERE id = ?")) {
             statement.setBoolean(1, aufgabe.isErledigt());
-            statement.setInt(2, aufgabe.getId());
+            statement.setTimestamp(2, Timestamp.valueOf(aufgabe.getEndzeit()));
+            statement.setInt(3, aufgabe.getId());
             statement.executeUpdate();
         } catch (SQLException exc) {
             throw new RuntimeException("Abhaken der Aufgabe " + aufgabe.getId() + " in DB fehlgeschlagen", exc);
@@ -147,7 +150,7 @@ public class AufgabenListe {
 
     private ArrayList<Aufgabe> readErledigteAufgabenFromDatabase(String user) {
         try (var statement = this.dbConnection.prepareStatement(
-                "SELECT id, besitzer, bezeichnung, erstellzeit, deadline, erledigt FROM aufgaben WHERE besitzer = ? AND erledigt = true")) {
+                "SELECT * FROM aufgaben WHERE besitzer = ? AND erledigt = true")) {
             statement.setString(1, user);
             var resultSet = statement.executeQuery();
             var erledigteaufgaben = new ArrayList<Aufgabe>();
