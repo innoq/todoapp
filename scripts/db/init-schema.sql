@@ -8,3 +8,4 @@ CREATE TABLE aufgaben (
 );
 
 ALTER TABLE aufgaben ADD COLUMN besitzer VARCHAR;
+ALTER TABLE aufgaben ADD COLUMN deadline DATE;

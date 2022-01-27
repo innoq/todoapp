@@ -14,6 +14,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.*;
 
 public class ToDoApp {
@@ -234,7 +235,16 @@ public class ToDoApp {
             else if (formData.get("bezeichnung").length() > 0
                 && formData.get("bezeichnung").length() <= 20) {
 
-                aufgabenListe.neueAufgabeForUser(user, formData.get("bezeichnung"));
+                String deadline = formData.get("deadline");
+                if (!deadline.isEmpty()) {
+                    LocalDate localDate = LocalDate.parse(deadline);
+                    aufgabenListe.neueAufgabeForUser(user, formData.get("bezeichnung"), localDate);
+                    System.out.println(localDate);
+
+                }
+                else{
+                    aufgabenListe.neueAufgabeForUser(user, formData.get("bezeichnung"), null);
+                }
             } else {
                 IContext context = new Context(Locale.GERMAN, Map.of(
                         "alleOffenenAufgaben", this.aufgabenListe.findOffeneAufgabenForUser(user),

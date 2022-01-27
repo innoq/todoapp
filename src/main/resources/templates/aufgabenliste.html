@@ -8,8 +8,21 @@
             color: red;
         }
 
+
+
         ul {
             list-style-type: none;
+        }
+
+
+        li.ueberfaellig {
+            color:red;
+            font-weight:bold;
+        }
+
+        li.heuteFaellig {
+            color:orange;
+
         }
 
         button.erledigen {
@@ -35,12 +48,17 @@
 </h2>
 
 <ul th:if="${!alleOffenenAufgaben.empty}">
-    <li th:each="aufg: ${alleOffenenAufgaben}">
+    <li th:each="aufg: ${alleOffenenAufgaben}" th:class="${aufg.ueberfaellig ? 'ueberfaellig' : (aufg.heuteFaellig ? 'heuteFaellig' : '')}">
         <form method="post" th:action="${'/aufgaben/' + aufg.id}">
             <button type="submit" class="erledigen" aria-label="Aufgabe abhaken">❎</button>  <!--Alternativ❎, sonst &#9744-->
             <input type="hidden" name="erledigt" value="true">
-            <span th:text="${aufg.bezeichnung}">Aufgabe</span>
-            <span th:text="${aufg.formattedErstellzeit}">Erstellzeit</span>
+            <span th:text="${aufg.bezeichnung}">Aufgabe</span>&nbsp;&nbsp;&nbsp;
+            (Erstellt: <span th:text="${aufg.formattedErstellzeit}">Erstellzeit</span>)&nbsp;&nbsp;&nbsp;&nbsp;
+                <span th:if="${aufg.deadline != null}">
+                (Deadline: <span th:text="${aufg.formattedDeadline}">
+                    Deadline
+                </span>)
+            </span>
         </form>
     </li>
 </ul>
@@ -53,6 +71,7 @@
         Aufgabe Hinzufügen
     </button>
     <input type="text" name="bezeichnung" th:value="${bezeichnung}" minlength="1" maxlength="20">
+    <input type="date" name="deadline" th:value="${deadline}" dataformatas="">
 </form>
 
 <!--Link-->
