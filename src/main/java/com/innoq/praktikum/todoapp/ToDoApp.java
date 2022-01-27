@@ -111,7 +111,7 @@ public class ToDoApp {
             return;
         }
 
-        var cookie = exchange.getRequestHeaders().getFirst("Cookie");
+        var cookie = findValidCookie(exchange);
         exchange.getResponseHeaders().add("Set-Cookie", cookie + "; Max-Age=0");
 
         redirectToLogin(exchange);
@@ -325,24 +325,30 @@ public class ToDoApp {
         return map;
     }
 
-    private boolean notContainsValidCookie(HttpExchange exchange) throws IOException {
-        String cookie = exchange.getRequestHeaders().getFirst("Cookie");
-
-        if (cookie == null || cookie.isEmpty()) {
-            System.out.println("Kein Cookie");
-            return true;
+    private String findValidCookie(HttpExchange exchange) {
+        List<String> alleCookies = exchange.getRequestHeaders().get("Cookie");
+        if (alleCookies == null) {
+            System.out.println("keinen Cookie gefunden");
+            return null;
         }
 
-        if (!cookie.matches("user=[A-Za-z0-9_]{3,20}")) {
-            System.out.println("Ungültiger Cookie: " + cookie);
-            return true;
+        for (String cookie : alleCookies) {
+            if (!cookie.isEmpty() && cookie.matches("user=[A-Za-z0-9_]{3,20}")) {
+                System.out.println("Validen Cookie gefunden");
+                return cookie;
+            }
         }
 
-        return false;
+        System.out.println("keinen validen Cookie gefunden");
+        return null;
+    }
+
+    private boolean notContainsValidCookie(HttpExchange exchange) {
+        return findValidCookie(exchange) == null;
     }
 
     private String readUserFromCookie(HttpExchange exchange) {
-        String cookie = exchange.getRequestHeaders().getFirst("Cookie");
+        String cookie = findValidCookie(exchange);
         return cookie.substring(5);
     }
 
