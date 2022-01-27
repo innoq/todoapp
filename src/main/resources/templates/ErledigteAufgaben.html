@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        p.warning {
+            color: red;
+        }
+
+        ul {
+            list-style-type: none;
+        }
+
+        button.undo {
+            background-color: #FAFAEB;
+            border: 0;
+            font-size: larger;
+        }
+        body {background-color:#FAFAEB;}
+    </style>
+</head>
+<title>Erledigte Aufgaben</title>
+<body>
+    <center>
+        <h1>
+            Erledigte Aufgaben
+        </h1>
+    </center>
+
+    <ul th:if="${!alleErledigtenAufgaben.empty}">
+        <li th:each="aufg: ${alleErledigtenAufgaben}">
+            <form method="post" th:action="${'/aufgaben/' + aufg.id}">
+                <button type="submit" class="undo" aria-label="Undo Aufgabe">⛔️</button> ️ <!--Alternativ❎, sonst &#9744-->
+                <input type="hidden" name="erledigt" value="false">
+                <span th:text="${aufg.bezeichnung}">Aufgabe</span>
+                <span th:text="${aufg.formattedErstellzeit}">Erstellzeit</span>
+            </form>
+        </li>
+    </ul>
+
+    <p th:if="${alleErledigtenAufgaben.empty}">Du hast noch keine erledigten Aufgaben</p>
+
+    <a href ="/aufgaben">
+        Offene Aufgaben
+    </a>
+
+</body>
+</html>

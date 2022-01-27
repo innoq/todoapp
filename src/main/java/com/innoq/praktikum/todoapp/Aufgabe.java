@@ -1,4 +1,6 @@
 package com.innoq.praktikum.todoapp;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -7,21 +9,24 @@ public class Aufgabe {
     private final String besitzer;
     private final String bezeichnung;
     private final LocalDateTime erstellzeit;
+    private LocalDate deadline;
     private boolean erledigt;
 
-    public Aufgabe(int id, String besitzer, String bezeichnung) {
+    public Aufgabe(int id, String besitzer, String bezeichnung, LocalDate deadline) {
         this.id = id;
         this.besitzer = besitzer;
         this.bezeichnung = bezeichnung;
         this.erstellzeit = LocalDateTime.now();
         this.erledigt = false;
+        this.deadline = deadline;
     }
 
-    public Aufgabe(int id, String besitzer, String bezeichnung, LocalDateTime erstellzeit, boolean erledigt) {
+    public Aufgabe(int id, String besitzer, String bezeichnung, LocalDateTime erstellzeit, LocalDate deadline, boolean erledigt) {
         this.id = id;
         this.besitzer = besitzer;
         this.bezeichnung = bezeichnung;
         this.erstellzeit = erstellzeit;
+        this.deadline = deadline;
         this.erledigt = erledigt;
     }
 
@@ -36,6 +41,14 @@ public class Aufgabe {
 
     public String getBezeichnung() {
         return bezeichnung;
+    }
+
+    public String getFormattedDeadline() {
+        return deadline.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+    }
+
+    public LocalDate getDeadline() {
+        return deadline;
     }
 
     public int getId() {
@@ -58,8 +71,23 @@ public class Aufgabe {
         return this.erledigt;
     }
 
+    public boolean isUeberfaellig() {
+        if (deadline == null){
+            return false;
+        }
+        return LocalDate.now().isAfter(deadline);
+    }
+
+    public boolean isHeuteFaellig() {
+        if (deadline == null) {
+            return false;
+        }
+        return LocalDate.now().isEqual(deadline);
+
+    }
+
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " '" + bezeichnung + "' (" + getId() + ")" +erledigt;
+        return getClass().getSimpleName() + " '" + bezeichnung + "' (" + getId() + ")" + erledigt;
     }
 }

@@ -14,6 +14,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.*;
 
 public class ToDoApp {
@@ -42,6 +43,7 @@ public class ToDoApp {
         httpServer.createContext("/logout", this::handleLogoutRequest);
         httpServer.createContext("/aufgaben", this::handleAufgabenRequest);
         httpServer.createContext("/health", this::handleHealthRequest);
+        httpServer.createContext("/erledigt", this::handleGetErledigteAufgabenRequest);
         httpServer.createContext("/", this::handleRootRequest);
         httpServer.start();
         System.out.println("HTTP Server auf Port 8080 gestartet");
@@ -69,6 +71,34 @@ public class ToDoApp {
         sendResponse(exchange, 200, "text/html", body);
     }
 
+    private void handleGetErledigteAufgabenRequest(HttpExchange exchange) throws IOException {
+        if (notContainsValidCookie(exchange)) {
+            redirectToLogin(exchange);
+            return;
+        }
+        String user = readUserFromCookie(exchange);
+
+        List<Aufgabe> erledigteAufgaben = aufgabenListe.findErledigteAufgabenForUser(user);
+        System.out.println(erledigteAufgaben.size() + " erledigte Aufgaben gefunden");
+
+        if (exchange.getRequestHeaders().getFirst("Accept").contains("text/html")) {
+            IContext context = new Context(Locale.GERMAN, Map.of(
+                    "user", user,
+                    "alleErledigtenAufgaben", erledigteAufgaben));
+            String data = templateEngine.process("templates/ErledigteAufgaben.html", context);
+            sendResponse(exchange, 200, "text/html", data);
+
+        } else if (exchange.getRequestHeaders().getFirst("Accept").contains("application/json")) {
+            String data = gson.toJson(erledigteAufgaben);
+
+            sendResponse(exchange, 200, "application/json", data);
+
+        } else {
+            String data = createPlainTextData(erledigteAufgaben);
+
+            sendResponse(exchange, 200, "text/plain", data);
+        }
+    }
     private void handlePostLoginFormRequest(HttpExchange exchange) throws IOException {
         Map<String, String> formData = readFormData(exchange);
         String name = formData.get("name");
@@ -205,7 +235,16 @@ public class ToDoApp {
             else if (formData.get("bezeichnung").length() > 0
                 && formData.get("bezeichnung").length() <= 20) {
 
-                aufgabenListe.neueAufgabeForUser(user, formData.get("bezeichnung"));
+                String deadline = formData.get("deadline");
+                if (!deadline.isEmpty()) {
+                    LocalDate localDate = LocalDate.parse(deadline);
+                    aufgabenListe.neueAufgabeForUser(user, formData.get("bezeichnung"), localDate);
+                    System.out.println(localDate);
+
+                }
+                else{
+                    aufgabenListe.neueAufgabeForUser(user, formData.get("bezeichnung"), null);
+                }
             } else {
                 IContext context = new Context(Locale.GERMAN, Map.of(
                         "alleOffenenAufgaben", this.aufgabenListe.findOffeneAufgabenForUser(user),
