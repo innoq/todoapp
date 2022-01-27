@@ -27,6 +27,10 @@ public class AufgabenListe {
         return readOffeneAufgabenFromDatabase(user);
     }
 
+    public List<Aufgabe> findErledigteAufgabenForUser(String user) {
+        return readErledigteAufgabenFromDatabase(user);
+    }
+
     public Aufgabe findAufgabeByUserAndId(String user, int id) {
         return readAufgabeFromDatabase(user, id);
     }
@@ -134,6 +138,30 @@ public class AufgabenListe {
             statement.executeUpdate();
         } catch (SQLException exc) {
             throw new RuntimeException("Abhaken der Aufgabe " + aufgabe.getId() + " in DB fehlgeschlagen", exc);
+        }
+    }
+
+    public List<Aufgabe> findEledigteAufgabenForUser(String user) {
+        return readOffeneAufgabenFromDatabase(user);
+    }
+
+    private ArrayList<Aufgabe> readErledigteAufgabenFromDatabase(String user) {
+        try (var statement = this.dbConnection.prepareStatement(
+                "SELECT id, besitzer, bezeichnung, erstellzeit, erledigt FROM aufgaben WHERE besitzer = ? AND erledigt = true")) {
+            statement.setString(1, user);
+            var resultSet = statement.executeQuery();
+            var erledigteaufgaben = new ArrayList<Aufgabe>();
+            while (resultSet.next()) {
+                var id = resultSet.getInt("id");
+                var besitzer = resultSet.getString("besitzer");
+                var bezeichnung = resultSet.getString("bezeichnung");
+                var erstellzeit = resultSet.getTimestamp("erstellzeit").toLocalDateTime();
+                var erledigt = resultSet.getBoolean("erledigt");
+                erledigteaufgaben.add(new Aufgabe(id, besitzer, bezeichnung, erstellzeit, erledigt));
+            }
+            return erledigteaufgaben;
+        } catch (SQLException exc) {
+            throw new RuntimeException("Lesen der erledigten Aufgaben aus DB fehlgeschlagen", exc);
         }
     }
 }
