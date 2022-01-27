@@ -16,19 +16,19 @@ public class AufgabenListe {
         this.dbConnection = initDbConnection();
     }
 
-    public void neueAufgabe(String bezeichnung) {
+    public void neueAufgabeForUser(String user, String bezeichnung) {
         int id = findNextId();
-        Aufgabe aufgabe = new Aufgabe(id, bezeichnung, false);
+        Aufgabe aufgabe = new Aufgabe(id, user, bezeichnung);
         insertIntoDatabase(aufgabe);
         System.out.println("Neue Aufgaben '" + bezeichnung + "' (id " + id + ") hinzugefügt");
     }
 
-    public List<Aufgabe> offeneAufgaben() {
-        return readOffeneAufgabenFromDatabase();
+    public List<Aufgabe> findOffeneAufgabenForUser(String user) {
+        return readOffeneAufgabenFromDatabase(user);
     }
 
-    public Aufgabe findAufgabeById(int id) {
-        return readAufgabeFromDatabase(id);
+    public Aufgabe findAufgabeByUserAndId(String user, int id) {
+        return readAufgabeFromDatabase(user, id);
     }
 
     public void alsErledigtAbhaken(Aufgabe aufgabe) {
@@ -60,7 +60,8 @@ public class AufgabenListe {
     }
 
     private int findNextId() {
-        try (var statement = this.dbConnection.prepareStatement("SELECT MAX(id) + 1 FROM aufgaben")) {
+        try (var statement = this.dbConnection.prepareStatement(
+                "SELECT MAX(id) + 1 FROM aufgaben")) {
             var resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getInt(1);
@@ -72,27 +73,32 @@ public class AufgabenListe {
     }
 
     private void insertIntoDatabase(Aufgabe aufgabe) {
-        try (var statement = this.dbConnection.prepareStatement("INSERT INTO aufgaben (id, bezeichnung, erstellzeit, erledigt) VALUES (?, ?, ?, ?)")) {
+        try (var statement = this.dbConnection.prepareStatement(
+                "INSERT INTO aufgaben (id, besitzer, bezeichnung, erstellzeit, erledigt) VALUES (?, ?, ?, ?, ?)")) {
             statement.setInt(1, aufgabe.getId());
-            statement.setString(2, aufgabe.getBezeichnung());
-            statement.setTimestamp(3, Timestamp.valueOf(aufgabe.getErstellzeit()));
-            statement.setBoolean(4, aufgabe.isterledigt());
+            statement.setString(2, aufgabe.getBesitzer());
+            statement.setString(3, aufgabe.getBezeichnung());
+            statement.setTimestamp(4, Timestamp.valueOf(aufgabe.getErstellzeit()));
+            statement.setBoolean(5, aufgabe.isErledigt());
             statement.executeUpdate();
         } catch (SQLException exc) {
             throw new RuntimeException("Schreiben der Aufgabe " + aufgabe.getId() + " in DB fehlgeschlagen", exc);
         }
     }
 
-    private ArrayList<Aufgabe> readOffeneAufgabenFromDatabase() {
-        try (var statement = this.dbConnection.prepareStatement("SELECT id, bezeichnung, erstellzeit, erledigt FROM aufgaben WHERE erledigt = false")) {
+    private ArrayList<Aufgabe> readOffeneAufgabenFromDatabase(String user) {
+        try (var statement = this.dbConnection.prepareStatement(
+                "SELECT id, besitzer, bezeichnung, erstellzeit, erledigt FROM aufgaben WHERE besitzer = ? AND erledigt = false")) {
+            statement.setString(1, user);
             var resultSet = statement.executeQuery();
             var aufgaben = new ArrayList<Aufgabe>();
             while (resultSet.next()) {
                 var id = resultSet.getInt("id");
+                var besitzer = resultSet.getString("besitzer");
                 var bezeichnung = resultSet.getString("bezeichnung");
                 var erstellzeit = resultSet.getTimestamp("erstellzeit").toLocalDateTime();
                 var erledigt = resultSet.getBoolean("erledigt");
-                aufgaben.add(new Aufgabe(id, bezeichnung, erledigt, erstellzeit));
+                aufgaben.add(new Aufgabe(id, besitzer, bezeichnung, erstellzeit, erledigt));
             }
             return aufgaben;
         } catch (SQLException exc) {
@@ -100,16 +106,19 @@ public class AufgabenListe {
         }
     }
 
-    private Aufgabe readAufgabeFromDatabase(int id) {
-        try (var statement = this.dbConnection.prepareStatement("SELECT id, bezeichnung, erstellzeit, erledigt FROM aufgaben WHERE id = ?")) {
+    private Aufgabe readAufgabeFromDatabase(String user, int id) {
+        try (var statement = this.dbConnection.prepareStatement(
+                "SELECT id, besitzer, bezeichnung, erstellzeit, erledigt FROM aufgaben WHERE id = ? AND besitzer = ?")) {
             statement.setInt(1, id);
+            statement.setString(2, user);
             var resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 var idFromDB = resultSet.getInt("id");
+                var besitzer = resultSet.getString("besitzer");
                 var bezeichnung = resultSet.getString("bezeichnung");
                 var erstellzeit = resultSet.getTimestamp("erstellzeit").toLocalDateTime();
                 var erledigt = resultSet.getBoolean("erledigt");
-                return new Aufgabe(idFromDB, bezeichnung, erledigt, erstellzeit);
+                return new Aufgabe(idFromDB, besitzer, bezeichnung, erstellzeit, erledigt);
             }
             return null;
         } catch (SQLException exc) {
@@ -118,8 +127,9 @@ public class AufgabenListe {
     }
 
     private void updateAufgabeInDatabase(Aufgabe aufgabe) {
-        try (var statement = this.dbConnection.prepareStatement("UPDATE aufgaben SET erledigt = ? WHERE id = ?")) {
-            statement.setBoolean(1, aufgabe.isterledigt());
+        try (var statement = this.dbConnection.prepareStatement(
+                "UPDATE aufgaben SET erledigt = ? WHERE id = ?")) {
+            statement.setBoolean(1, aufgabe.isErledigt());
             statement.setInt(2, aufgabe.getId());
             statement.executeUpdate();
         } catch (SQLException exc) {
