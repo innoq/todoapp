@@ -96,18 +96,7 @@ public class AufgabenListe {
             var resultSet = statement.executeQuery();
             var aufgaben = new ArrayList<Aufgabe>();
             while (resultSet.next()) {
-                var id = resultSet.getInt("id");
-                var besitzer = resultSet.getString("besitzer");
-                var bezeichnung = resultSet.getString("bezeichnung");
-                var erstellzeit = resultSet.getTimestamp("erstellzeit").toLocalDateTime();
-                var deadline = resultSet.getDate("deadline");
-                var erledigt = resultSet.getBoolean("erledigt");
-                if(deadline != null) {
-                    aufgaben.add(new Aufgabe(id, besitzer, bezeichnung, erstellzeit, deadline.toLocalDate(), erledigt));
-                }
-                else{
-                    aufgaben.add(new Aufgabe(id, besitzer, bezeichnung, erstellzeit, null, erledigt));
-                }
+                aufgaben.add(createAufgabeFromResultSet(resultSet));
             }
             return aufgaben;
         } catch (SQLException exc) {
@@ -122,23 +111,26 @@ public class AufgabenListe {
             statement.setString(2, user);
             var resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                var idFromDB = resultSet.getInt("id");
-                var besitzer = resultSet.getString("besitzer");
-                var bezeichnung = resultSet.getString("bezeichnung");
-                var erstellzeit = resultSet.getTimestamp("erstellzeit").toLocalDateTime();
-                var deadline = resultSet.getDate("deadline");
-                var erledigt = resultSet.getBoolean("erledigt");
-                if (deadline != null) {
-                    return new Aufgabe(idFromDB, besitzer, bezeichnung, erstellzeit, deadline.toLocalDate(), erledigt);
-                }
-                else{
-                    return new Aufgabe(idFromDB, besitzer, bezeichnung, erstellzeit, null, erledigt);
-
-                }
+                return createAufgabeFromResultSet(resultSet);
             }
             return null;
         } catch (SQLException exc) {
             throw new RuntimeException("Lesen der Aufgabe " + id + " aus DB fehlgeschlagen", exc);
+        }
+    }
+
+    private Aufgabe createAufgabeFromResultSet(ResultSet resultSet) throws SQLException {
+        var idFromDB = resultSet.getInt("id");
+        var besitzer = resultSet.getString("besitzer");
+        var bezeichnung = resultSet.getString("bezeichnung");
+        var erstellzeit = resultSet.getTimestamp("erstellzeit").toLocalDateTime();
+        var deadline = resultSet.getDate("deadline");
+        var erledigt = resultSet.getBoolean("erledigt");
+        if (deadline != null) {
+            return new Aufgabe(idFromDB, besitzer, bezeichnung, erstellzeit, deadline.toLocalDate(), erledigt);
+        }
+        else{
+            return new Aufgabe(idFromDB, besitzer, bezeichnung, erstellzeit, null, erledigt);
         }
     }
 
@@ -153,10 +145,6 @@ public class AufgabenListe {
         }
     }
 
-    public List<Aufgabe> findEledigteAufgabenForUser(String user) {
-        return readOffeneAufgabenFromDatabase(user);
-    }
-
     private ArrayList<Aufgabe> readErledigteAufgabenFromDatabase(String user) {
         try (var statement = this.dbConnection.prepareStatement(
                 "SELECT id, besitzer, bezeichnung, erstellzeit, deadline, erledigt FROM aufgaben WHERE besitzer = ? AND erledigt = true")) {
@@ -164,18 +152,7 @@ public class AufgabenListe {
             var resultSet = statement.executeQuery();
             var erledigteaufgaben = new ArrayList<Aufgabe>();
             while (resultSet.next()) {
-                var id = resultSet.getInt("id");
-                var besitzer = resultSet.getString("besitzer");
-                var bezeichnung = resultSet.getString("bezeichnung");
-                var erstellzeit = resultSet.getTimestamp("erstellzeit").toLocalDateTime();
-                var deadline = resultSet.getDate("deadline");
-                var erledigt = resultSet.getBoolean("erledigt");
-                if (deadline != null) {
-                    erledigteaufgaben.add(new Aufgabe(id, besitzer, bezeichnung, erstellzeit, deadline.toLocalDate(), erledigt));
-                }
-                else{
-                    erledigteaufgaben.add(new Aufgabe(id, besitzer, bezeichnung, erstellzeit, null, erledigt));
-                }
+                erledigteaufgaben.add(createAufgabeFromResultSet(resultSet));
             }
             return erledigteaufgaben;
         } catch (SQLException exc) {
