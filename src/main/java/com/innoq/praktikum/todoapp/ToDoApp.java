@@ -46,9 +46,30 @@ public class ToDoApp {
         httpServer.createContext("/aufgaben", this::handleAufgabenRequest);
         httpServer.createContext("/health", this::handleHealthRequest);
         httpServer.createContext("/erledigt", this::handleGetErledigteAufgabenRequest);
+        httpServer.createContext("/static", this::handleStaticRequest);
         httpServer.createContext("/", this::handleRootRequest);
         httpServer.start();
         System.out.println("HTTP Server auf Port 8080 gestartet");
+    }
+
+    private void handleStaticRequest(HttpExchange exchange) throws IOException {
+        var uri = exchange.getRequestURI().getPath();
+        var filename = uri.substring(uri.lastIndexOf("/") + 1);
+        System.out.println(filename);
+
+        try (var fileInputStream = ToDoApp.class.getResourceAsStream("/static/" + filename)) {
+            var bytes = new byte[fileInputStream.available()];
+            fileInputStream.read(bytes);
+
+            if (filename.endsWith(".css")) {
+                sendResponse(exchange, 200, "text/css", new String(bytes));
+            } else {
+                sendEmptyResponse(exchange, 404);
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace(System.err);
+            sendEmptyResponse(exchange, 404);
+        }
     }
 
     private void handleLoginRequest(HttpExchange exchange) throws IOException {
