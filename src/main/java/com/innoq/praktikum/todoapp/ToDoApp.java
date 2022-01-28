@@ -16,6 +16,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ToDoApp {
 
@@ -141,8 +143,7 @@ public class ToDoApp {
             return;
         }
 
-        var cookie = findValidCookie(exchange);
-        exchange.getResponseHeaders().add("Set-Cookie", cookie + "; Max-Age=0");
+        expireCookie(exchange);
 
         redirectToLogin(exchange);
     }
@@ -374,32 +375,34 @@ public class ToDoApp {
         return map;
     }
 
-    private String findValidCookie(HttpExchange exchange) {
-        List<String> alleCookies = exchange.getRequestHeaders().get("Cookie");
-        if (alleCookies == null) {
+    private boolean notContainsValidCookie(HttpExchange exchange) {
+        return readUserFromCookie(exchange) == null;
+    }
+
+    private String readUserFromCookie(HttpExchange exchange) {
+        return readUserFromCookie(exchange.getRequestHeaders().getFirst("Cookie"));
+    }
+
+    static String readUserFromCookie(String cookie) {
+        if (cookie == null || cookie.isEmpty()) {
             System.out.println("keinen Cookie gefunden");
             return null;
         }
 
-        for (String cookie : alleCookies) {
-            System.out.println("Check Cookie " + cookie);
-            if (cookie.matches("user=[A-Za-z0-9_]{3,20}")) {
-                System.out.println("Validen Cookie gefunden");
-                return cookie;
-            }
+        Pattern pattern = Pattern.compile(".*user=([A-Za-z0-9_]{3,20}).*");
+        Matcher matcher = pattern.matcher(cookie);
+        if (matcher.matches()) {
+            System.out.println("Validen Cookie gefunden");
+            return matcher.group(1);
         }
 
         System.out.println("keinen validen Cookie gefunden");
         return null;
     }
 
-    private boolean notContainsValidCookie(HttpExchange exchange) {
-        return findValidCookie(exchange) == null;
-    }
-
-    private String readUserFromCookie(HttpExchange exchange) {
-        String cookie = findValidCookie(exchange);
-        return cookie.substring(5);
+    private void expireCookie(HttpExchange exchange) {
+        var user = readUserFromCookie(exchange);
+        exchange.getResponseHeaders().add("Set-Cookie", "user=" + user + "; Max-Age=0");
     }
 
 }
