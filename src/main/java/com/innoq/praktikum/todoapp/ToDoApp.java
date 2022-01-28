@@ -382,7 +382,8 @@ public class ToDoApp {
         }
 
         for (String cookie : alleCookies) {
-            if (!cookie.isEmpty() && cookie.matches("user=[A-Za-z0-9_]{3,20}")) {
+            System.out.println("Check Cookie " + cookie);
+            if (cookie.matches("user=[A-Za-z0-9_]{3,20}")) {
                 System.out.println("Validen Cookie gefunden");
                 return cookie;
             }
