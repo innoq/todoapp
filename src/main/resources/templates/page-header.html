@@ -8,9 +8,17 @@
     <header>
         <center><h1>ToDoApp - Aufgabenliste</h1></center>
 
-        <form action="/logout" method="post">
-            <button type="submit">Abmelden</button>
-        </form>
+        <nav>
+            <ul>
+                <li><a href ="/aufgaben">Offene Aufgaben</a></li>
+                <li><a href ="/erledigt">Erledigte Aufgaben</a></li>
+                <li>
+                    <form action="/logout" method="post">
+                        <button type="submit">Abmelden</button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
 
         <hr>
     </header>

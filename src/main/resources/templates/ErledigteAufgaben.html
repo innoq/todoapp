@@ -17,6 +17,12 @@
             font-size: larger;
         }
         body {background-color:#FAFAEB;}
+
+        nav > ul {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-evenly;
+        }
     </style>
 </head>
 <title>Erledigte Aufgaben</title>
@@ -41,10 +47,6 @@
     </ul>
 
     <p th:if="${alleErledigtenAufgaben.empty}">Du hast noch keine erledigten Aufgaben</p>
-
-    <a href ="/aufgaben">
-        Offene Aufgaben
-    </a>
 
 </body>
 </html>
