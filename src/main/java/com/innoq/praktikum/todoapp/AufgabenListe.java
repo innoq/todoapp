@@ -140,7 +140,8 @@ public class AufgabenListe {
         try (var statement = this.dbConnection.prepareStatement(
                 "UPDATE aufgaben SET erledigt = ?, endzeit = ? WHERE id = ?")) {
             statement.setBoolean(1, aufgabe.isErledigt());
-            statement.setTimestamp(2, Timestamp.valueOf(aufgabe.getEndzeit()));
+            statement.setTimestamp(2,
+                    aufgabe.getEndzeit() != null ? Timestamp.valueOf(aufgabe.getEndzeit()) : null);
             statement.setInt(3, aufgabe.getId());
             statement.executeUpdate();
         } catch (SQLException exc) {
