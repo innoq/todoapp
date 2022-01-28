@@ -21,11 +21,11 @@
 </head>
 <title>Erledigte Aufgaben</title>
 <body>
-    <center>
-        <h1>
-            Erledigte Aufgaben
-        </h1>
-    </center>
+    <header th:replace="templates/page-header.html :: header"></header>
+
+    <h2>
+        Erledigte Aufgaben
+    </h2>
 
     <ul th:if="${!alleErledigtenAufgaben.empty}">
         <li th:each="aufg: ${alleErledigtenAufgaben}">
