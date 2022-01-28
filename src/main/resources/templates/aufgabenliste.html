@@ -31,6 +31,16 @@
             font-size: larger;
         }
         body {background-color:#FAFAEB;}
+
+        form.neueAufgabe > div {
+            display: grid;
+            grid-template-columns: 6rem 10rem;
+            grid-gap: 0.5rem;
+        }
+
+        form.neueAufgabe {
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -58,13 +68,19 @@
 
 <p th:if="${alleOffenenAufgaben.empty}">Du hast noch keine offenen Aufgaben</p>
 
-<form method="post">
+<br>
+
+<h3>Füge eine neue Aufgabe hinzu</h3>
+<form method="post" class="neueAufgabe">
     <p class="warning" th:if="${fehlermeldung != null}" th:text="${fehlermeldung}"></p>
-    <button type="submit">
-        Aufgabe Hinzufügen
-    </button>
-    <input type="text" name="bezeichnung" th:value="${bezeichnung}" minlength="1" maxlength="20">
-    <input type="date" name="deadline" th:value="${deadline}" dataformatas="">
+    <div>
+        <label>Bezeichnung:</label>
+        <input type="text" name="bezeichnung" th:value="${bezeichnung}" minlength="1" maxlength="20">
+        <label>Deadline:</label>
+        <input type="date" name="deadline" th:value="${deadline}" dataformatas="">
+        <span></span>
+        <button type="submit">hinzufügen</button>
+    </div>
 </form>
 
 <!--Link-->
