@@ -46,9 +46,9 @@
             <button type="submit" class="erledigen" aria-label="Aufgabe abhaken">❎</button>  <!--Alternativ❎, sonst &#9744-->
             <input type="hidden" name="erledigt" value="true">
             <span th:text="${aufg.bezeichnung}">Aufgabe</span>&nbsp;&nbsp;&nbsp;
-            (Erstellt: <span th:text="${aufg.formattedErstellzeit}">Erstellzeit</span>)&nbsp;&nbsp;&nbsp;&nbsp;
+            (Erstellt:&nbsp;<span th:text="${aufg.formattedErstellzeit}">Erstellzeit</span>)&nbsp;&nbsp;&nbsp;&nbsp;
                 <span th:if="${aufg.deadline != null}">
-                (Deadline: <span th:text="${aufg.formattedDeadline}">
+                (Deadline:&nbsp;<span th:text="${aufg.formattedDeadline}">
                     Deadline
                 </span>)
             </span>
