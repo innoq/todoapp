@@ -1,3 +1,66 @@
-body {
+p.warning {
     color: red;
+}
+
+
+
+ul {
+    list-style-type: none;
+}
+
+
+li.ueberfaellig {
+    color:red;
+    font-weight:bold;
+}
+
+li.heuteFaellig {
+    color:orange;
+
+}
+
+button.erledigen, button.undo {
+    background-color: #FAFAEB;
+    border: 0;
+    font-size: larger;
+}
+
+body {
+    background-color:#FAFAEB;
+    font-family: sans-serif;
+}
+
+form.neueAufgabe > div {
+    display: grid;
+    grid-template-columns: 6rem 10rem;
+    grid-gap: 0.5rem;
+}
+
+form.neueAufgabe {
+    margin-bottom: 1rem;
+}
+
+nav > ul {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: baseline;
+}
+
+nav a, nav button {
+    border: 1px solid black;
+    padding: 0.3rem;
+    background-color: bisque;
+    font-size: medium;
+    cursor: pointer;
+}
+
+nav a:hover, nav button:hover {
+    background-color: burlywood;
+}
+
+nav a {
+    color: black;
+    text-decoration: none;
+    font-size: medium;
 }
