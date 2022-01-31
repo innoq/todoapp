@@ -6,7 +6,7 @@ image:
 env:
   - { name: DATABASE_URL, value: "jdbc:postgresql://todoapp-db.cffrlivljgmr.eu-central-1.rds.amazonaws.com:5432/todoapp" }
   - { name: DATABASE_USERNAME, value: "todoapp" }
-  - { name: DATABASE_PASSWORD, value: "todoapp" }
+  - { name: DATABASE_PASSWORD, valueFrom: { secretKeyRef: { name: credentials, key: DATABASE_PASSWORD }}}
 
 owner: torsten.mandry@innoq.com
 gitRepo: https://gitlab.innoq.com/innoq/praktika/todoapp
